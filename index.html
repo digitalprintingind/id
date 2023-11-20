@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CV-ID</title>
+
+    <meta name="description" content="Vcard Profile Resume Portfolio Contact & Maps">
+    <meta name="author" content="ArtRow">
+
+    <link rel="shortcut icon" href="images/fav.png" type="image/png" />
+
+    <link rel="stylesheet" href="css/main.css" media="screen" />
+    <link rel="stylesheet" href="css/flexslider.css" media="screen" />
+    <link rel="stylesheet" href="css/fancybox-light.css" media="screen" />
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,300,600,700' rel='stylesheet' type='text/css' />
+    <script src="js/jquery-1.8.3.min.js"></script>
+    <script src="js/jquery.isotope.min.js"></script>
+    <script src="http://maps.google.com/maps/api/js?sensor=false&amp;language=en"></script>
+	<script>if (window.location.hash.indexOf('#!') !== -1) window.location.hash = '';</script>
+</head>
+
+    <body>
+
+<style>
+#floating-button				{	width: 50px;  height: 50px;  border-radius: 50%;  background: #376ffd;  position: fixed;  bottom: 20px;  right: 20px;  cursor: pointer;  box-shadow: 0px 2px 5px #666;}
+#container-floating				{	position: fixed;  width: 50px;  height: 50px;  bottom: 20px;  right: 20px;  z-index: 50px;}
+#container-floating:hover		{	height: 200px;  width: 50px;}
+#container-floating:hover .plus	{	animation: plus-in 0.15s linear;  animation-fill-mode: forwards;}
+#container-floating:hover .edit	{	animation: edit-in 0.2s;   animation-delay: 0.1s;  animation-fill-mode: forwards;}
+#container-floating:hover .nds	{	animation: bounce-nds 0.1s linear;  animation-fill-mode:  forwards;}
+#container-floating:hover .nd1	{	animation-delay: 0.08s;}
+#container-floating:hover .nd2	{	animation-delay: 0.15s;}
+#container-floating:hover .nd3	{	animation-delay: 0.08s;}
+#container-floating:hover .nd4	{	animation-delay: 0.15s;}
+#container-floating:hover .nd5	{	animation-delay: 0.2s;}
+
+@keyframes edit-in				{	from {opacity: 0; transform: rotateZ(-70deg);}    to {opacity: 1; transform: rotateZ(0deg);}}
+@keyframes edit-out				{	from {opacity: 1; transform: rotateZ(0deg);}    to {opacity: 0; transform: rotateZ(-70deg);}}
+@keyframes plus-in				{	from {opacity: 1; transform: rotateZ(0deg);}    to {opacity: 0; transform: rotateZ(180deg);}}
+@keyframes plus-out				{	from {opacity: 0; transform: rotateZ(180deg);}    to {opacity: 1; transform: rotateZ(0deg);}}
+@keyframes bounce-nds			{	from {opacity: 0;}    to {opacity: 1; transform: scale(1);}}
+@keyframes bounce-out-nds		{	from {opacity: 1; transform: scale(1);}    to {opacity: 0; transform: scale(0);}}
+
+.nds							{	width: 40px;  height: 40px;  border-radius: 50%;  position: fixed;  z-index: 300;  transform:  scale(0);  cursor: pointer;}
+.nd1							{	right: 25px;  bottom: 80px;  animation-delay: 0.2s;    animation: bounce-out-nds 0.3s linear;  animation-fill-mode:  forwards;}
+.nd2							{	right: 25px;  bottom: 125px;  animation-delay: 0.15s;    animation: bounce-out-nds 0.15s linear;  animation-fill-mode:  forwards;}
+.nd3							{	right: 25px;  bottom: 170px;  animation-delay: 0.1s;    animation: bounce-out-nds 0.1s linear;  animation-fill-mode:  forwards;}
+.nd4							{	right: 25px;  bottom: 215px;  animation-delay: 0.08s;  animation: bounce-out-nds 0.1s linear;  animation-fill-mode:  forwards;}
+.nd5							{	right: 25px;  bottom: 260px;  animation-delay: 0.2s;    animation: bounce-out-nds 0.3s linear;  animation-fill-mode:  forwards;}
+.plus							{	color: white;  position: absolute;  top: 0;  display: block;  bottom: 0;  left: 0;  right: 0;  text-align: center;  padding: 0;  margin: 0;  line-height: 55px;  font-size: 38px;  font-family: 'Roboto';  font-weight: 300;  animation: plus-out 0.3s;  transition: all 0.3s;}
+.edit							{	width: 50px;  height: 50px;border-radius: 50%;position: absolute;  top: 0;  display: block;  bottom: 0;  left: 0;  display: block;  right: 0;  padding: 0;  opacity: 0;  margin: auto;  line-height: 65px;  transform: rotateZ(-70deg);  transition: all 0.3s;  animation: edit-out 0.3s;}
+.reminder						{	width: 40px;  height: 40px;}
+
+.pv								{	width:220px;height:165px;display:inline-block;overflow:hidden;position:relative;text-align:center;cursor:default;}
+.pv .mask,.pv .content			{	background:#88b82c;width:220px;height:120px;position:absolute;overflow:hidden;top:0;left:0;}
+.pv img							{	display:block;position:relative;}
+.pv p							{	font-family:Georgia,serif;font-style:italic;font-size:12px;position:relative;color:#000;padding:10px 10px 10px;text-align:center;}
+.pv-fourth img					{	-webkit-transition: all 0.4s ease-in-out 0.2s;   -moz-transition: all 0.4s ease-in-out 0.2s;   -o-transition: all 0.4s ease-in-out 0.2s;   -ms-transition: all 0.4s ease-in-out 0.2s;   transition: all 0.4s ease-in-out 0.2s;   -ms-filter: "progid: DXImageTransform.Microsoft.Alpha(Opacity=100)";   filter: alpha(opacity=100);   opacity: 1;}
+.pv-fourth .mask				{   -ms-filter: "progid: DXImageTransform.Microsoft.Alpha(Opacity=0)";   filter: alpha(opacity=0);   opacity: 0;   -webkit-transform: scale(0) rotate(-180deg);   -moz-transform: scale(0) rotate(-180deg);   -o-transform: scale(0) rotate(-180deg);   -ms-transform: scale(0) rotate(-180deg);   transform: scale(0) rotate(-180deg);   -webkit-transition: all 0.4s ease-in;   -moz-transition: all 0.4s ease-in;   -o-transition: all 0.4s ease-in;   -ms-transition: all 0.4s ease-in;   transition: all 0.4s ease-in;   -webkit-border-radius: 0px;   -moz-border-radius: 0px;   border-radius: 0px;}
+.pv-fourth h2					{   -ms-filter: "progid: DXImageTransform.Microsoft.Alpha(Opacity=0)";   filter: alpha(opacity=0);   opacity: 0;   border-bottom: 1px solid rgba(0, 0, 0, 0.3);   background: transparent;   margin: 20px 40px 0px 40px;   -webkit-transition: all 0.5s ease-in-out;   -moz-transition: all 0.5s ease-in-out;   -o-transition: all 0.5s ease-in-out;   -ms-transition: all 0.5s ease-in-out;   transition: all 0.5s ease-in-out;}
+.pv-fourth p					{   -ms-filter: "progid: DXImageTransform.Microsoft.Alpha(Opacity=0)";   filter: alpha(opacity=0);   opacity: 0;   -webkit-transition: all 0.5s ease-in-out;   -moz-transition: all 0.5s ease-in-out;   -o-transition: all 0.5s ease-in-out;   -ms-transition: all 0.5s ease-in-out;   transition: all 0.5s ease-in-out;}
+.pv-fourth a.info				{   -ms-filter: "progid: DXImageTransform.Microsoft.Alpha(Opacity=0)";   filter: alpha(opacity=0);   opacity: 0;   -webkit-transition: all 0.5s ease-in-out;   -moz-transition: all 0.5s ease-in-out;   -o-transition: all 0.5s ease-in-out;   -ms-transition: all 0.5s ease-in-out;   transition: all 0.5s ease-in-out;}
+.pv-fourth:hover .mask			{   -ms-filter: "progid: DXImageTransform.Microsoft.Alpha(Opacity=100)";   filter: alpha(opacity=100);   opacity: 1;   -webkit-transform: scale(1) rotate(0deg);   -moz-transform: scale(1) rotate(0deg);   -o-transform: scale(1) rotate(0deg);   -ms-transform: scale(1) rotate(0deg);   transform: scale(1) rotate(0deg);   -webkit-transition-delay: 0.2s;   -moz-transition-delay: 0.2s;   -o-transition-delay: 0.2s;   -ms-transition-delay: 0.2s;   transition-delay: 0.2s;}
+.pv-fourth:hover img			{   -webkit-transform: scale(0);   -moz-transform: scale(0);   -o-transform: scale(0);   -ms-transform: scale(0);   transform: scale(0);   -ms-filter: "progid: DXImageTransform.Microsoft.Alpha(Opacity=0)";   filter: alpha(opacity=0);   opacity: 0;   -webkit-transition-delay: 0s;   -moz-transition-delay: 0s;   -o-transition-delay: 0s;   -ms-transition-delay: 0s;   transition-delay: 0s;}
+.pv-fourth:hover h2,
+.pv-fourth:hover p,
+.pv-fourth:hover a.info 		{   -ms-filter: "progid: DXImageTransform.Microsoft.Alpha(Opacity=100)";   filter: alpha(opacity=100);   opacity: 1;   -webkit-transition-delay: 0.5s;   -moz-transition-delay: 0.5s;   -o-transition-delay: 0.5s;   -ms-transition-delay: 0.5s;   transition-delay: 0.5s;}
+.img							{	width:220px;height:120px;}
+
+</style>
+
+	
+	<!-- Sound Tab -->
+	<audio><source src="audio/bubble_sound.mp3"/></audio>
+	
+	<!-- Logo Demo -->
+	<a id="demo-logo" href="/"><img src=""></a>
+	<a class="fancybox" data-fancybox-type="iframe" href="https://chatroll.com/embed/chat/vcardrvs?id=v6x3dJg_6H6&platform=html"><img id="demo-logo" style="right:170px;" src="" /></a>
+	<!-- /Logo Demo -->
+	
+	<!-- Main Content -->
+	<div id="content-wrapper">
+			
+	<!-- ABOUTME -->
+	<div id="aboutme">
+			
+		<!-- Flexslider -->
+		<div class="slider-wrapper"><div class="flexslider">
+			<ul class="slides">
+				<li><img src="images/1.jpg" alt="" /></li>
+				<li><img src="images/2.jpg" alt="" /></li>
+				<li><img src="images/3.jpg" alt="" /></li>
+				<li><img src="images/4.jpg" alt="" /></li>
+			</ul>
+		</div></div>
+		<!-- /Flexslider -->
+
+		<!-- About Wrapper -->
+		<div class="about-wrapper">
+			<div class="title">
+				<h4>Ridwan Virga Septiawan</h4>
+				<h5>GRAPHIC & WEB DESIGNER</h5>
+			</div>
+			<div class="download-card"><!-- Button Download vCard -->
+				<a class="button" href="images/cv.jpg" target="_blank">
+					<div class="button-medium button-red">
+						<div class="button-anim"></div>
+						<div class="button-medium-label">Download vCard</div>
+					</div>
+				</a>
+			</div>
+					
+			<!-- Info Slider -->
+			<div class="info-slider">
+				<div class="info-slide-list"><!-- Info Slide List -->
+					<div class="info-slide-wrapper"><!-- Info Slide Wrapper -->
+					
+						<div class="info-slide-item"><!-- 1 -->
+							<div class="top-border-red">
+							<p>
+								Hay, perkenalkan nama saya Ridwan VS.<br />
+								Tujuan saya disini hanya memberikan informasi-informasi yang saya pelajari selama di Internet dan mencoba membuat kreasi-kreasi baru di Bloggdi dan Website ini.
+							</p>
+							</div>
+						</div>
+
+						<div class="info-slide-item"><!-- 2 -->
+							<div class="top-border-blue"><a href='#resume'>
+								<div class="left-column">
+									<ul class="main-info-list">
+										<li>Name<span>Ridwan VS</span></li>
+										<li>Birthday<span>Cirebon, 00 Bln 1992</span></li>
+										<li>Alamat<span>Klangenan - Cirebon - Indonesia</span></li>
+							
+			  <div class="floatlimit"></div>						<li>Phone<span><a href='http://wa.me/6285172288904'>Click Chat Fast</a></span></li>
+										<li>Email<span><a href='mailto:ridwanvs@gmail.com'>Send Data Request</a></span></li>
+									</ul>
+								</div></a>
+							</div>
+						</div>
+
+						<div class="info-slide-item"><!-- 3 -->
+							<div class="top-border-green">
+								<ul class="mini-portfolio"><a href='#portfolio'>
+									<li class="asdf minip-1"><div class="minispan"><span>See My Portfolio</span></div></li>
+									<li class="helper-miniportfolio-margin"></li><!-- simulated margin for media screen  -->
+									<li class="asdf minip-2"><div class="minispan"><span>See My Portfolio</span></div></li>
+									<li class="asdf medip-1"><div class="minispan"><span>See My Portfolio</span></div></li></a>
+								</ul>
+							</div>
+						</div>
+
+						<div class="info-slide-item"><!-- 4 -->
+							<div class="top-border-yellow"><a href='#lokasi'>
+								<div class="mini-location">
+									<div class="mini-icon-pin"></div>
+									<div class="mini-location-text">Klangenan - Cirebon - Indonesia</div>
+								</div></a>
+							</div>
+						</div>
+
+					</div>
+					<div class="clear"></div>
+				</div>
+			</div><!-- /Info Slider -->
+		</div><!-- /About Wrapper -->
+
+		<div class="floatlimit"></div>
+
+	</div><!-- /AboutMe -->
+
+	<!-- NAVIGATION -->
+	<div id="nav">
+	<div id="logo"><h2>Ridwan VS</h2></div>
+		<ul class="etabs">
+			<li class="tab tab-main">
+				<a href="#aboutme" class="gradient-red">
+					<div class="navicon-about"></div>
+					<div class="navicon-text">About</div>
+					<div class="uhere-text">You here</div>
+				</a>
+			</li>
+			<li class="tab tab-notmain">
+				<a href="#resume" class="gradient-blue">
+					<div class="navicon-resume"></div>
+					<div class="navicon-text">Resume</div>
+				</a>
+			</li>
+			<li class="tab tab-notmain">
+				<a href="#portfolio" class="gradient-green">
+					<div class="navicon-portfolio"></div>
+					<div class="navicon-text">Portfolio</div>
+				</a>
+			</li>
+			<li class="tab tab-notmain">
+				<a href="#contacts" class="gradient-yellow">
+					<div class="navicon-contact"></div>
+					<div class="navicon-text">Contacts</div>
+				</a>
+			</li>
+		</ul>
+
+	</div><!-- /NAVIGATION -->
+
+	<!-- RESUME -->
+	<div id="resume" class="span-top">
+	<div class="fill-blue">BIODATA</div>
+
+		<div class="left-column">
+			<div class="substrate"><!-- Substrate 1 -->
+				<h2>Profile</h2>
+				<img src="images/about_photo.jpg" alt="">
+				<ul class="main-info-list">
+					<li>Nama	<span>Ridwan VS</span>														<div class="floatlimit"></div></li>
+					<li>Lahir	<span>Cirebon, 00 Bln 1992</span>											<div class="floatlimit"></div></li>
+					<li>Alamat	<span><a href='#lokasi'>Klangenan - Cirebon - Indonesia 45156</a></span>	<div class="floatlimit"></div></li>
+					<li>WA		<span><a href='http://wa.me/6285172288904'>Chat Fast Respond</a></span>		<div class="floatlimit"></div></li>
+					<li>Email	<span><a href='mailto:ridwanvs@gmail.com'>Send Data Request</a></span>		<div class="floatlimit"></div></li>
+					<li>Site	<span><a href='https://cv-id.000webhostapp.com'>vCard RVS</a></span>	<div class="floatlimit"></div></li>
+				</ul>
+				<a class="button" href="images/cv.jpg" target="_blank"><!-- Button Download vCard -->
+					<div class="button-big button-blue">
+						<div class="button-anim"></div>
+						<div class="button-big-label">Download</div>
+					</div>
+				</a>
+				<div class="paper-clip"></div>
+			</div><!-- /Substrate -->
+			<div class="substrate"><!-- Substrate 2 -->
+				<h2>My Skills</h2><br/>
+				<h3>Graphic & Office</h3>
+				<ul class="skills">
+					<li class="skill">MS. Word		<span class="skill-blue-star-5"></span>		</li>
+					<li class="skill">MS. Excel		<span class="skill-green-star-4"></span>	</li>
+					<li class="skill">Photoshop		<span class="skill-blue-star-5"></span>		</li>
+					<li class="skill">CorelDraw		<span class="skill-green-star-4"></span>	</li>
+				</ul>
+				<h3>Web Design</h3>
+				<ul class="skills">
+					<li class="skill">HTML+CSS		<span class="skill-red-fill-4"></span>		</li>
+					<li class="skill">Javascript	<span class="skill-yellow-fill-2"></span>	</li>
+					<li class="skill">Php			<span class="skill-blue-fill-1"></span>		</li>
+				</ul>
+				<div class="paper-clip"></div>
+			</div><!-- /Substrate -->
+		</div>
+
+		<div class="right-column">
+			<div class="substrate gradient-blue font-blue">
+				<h2>About Me</h2>
+							<p>
+								Hay, perkenalkan nama saya Ridwan VS.<br />
+								Tujuan saya disini hanya memberikan informasi-informasi yang saya pelajari selama di Internet dan mencoba membuat kreasi-kreasi baru di Blogger dan Website ini.
+							</p>
+			</div>
+			<div class="substrate">
+				<h2 id="sbt">Education</h2>
+				<div class="left-blue">
+					<div class="time-period-left-blue"></div>
+					<h4><span class="time-period-right-blue">1997 - 1998</span>tk cahaya pintar</h4>
+					<p>Jl. Nyimas Endang Geulis, Klangenan - Cirebon</p>
+					<div class="time-period-left-blue"></div>
+					<h4><span class="time-period-right-blue">1999 - 2005</span>sd negeri 1 karang sari</h4>
+					<p>Jl. Raya Megu, Weru - Cirebon</p>
+					<div class="time-period-left-blue"></div>
+					<h4><span class="time-period-right-blue">2005 - 2008</span>smp negeri 1 klangenan</h4>
+					<p>Jl. Indogren, Klangenan - Cirebon</p>
+					<div class="time-period-left-blue"></div>
+					<h4><span class="time-period-right-blue">2008 - 2011</span>sma negeri 1 jamblang</h4>
+					<p>Jl. Sitiwinangun, Jamblang - Cirebon</p>
+				</div>
+				<div class="paper-clip"></div>
+			</div>
+			<div class="substrate">
+				<h2 id="sbt">Work Experiences</h2>
+				<div class="left-blue">
+					<div class="time-period-left-blue"></div>
+					<h4><span class="time-period-right-blue">2011 - 2013</span>bursa computer</h4>
+					<p>Marketing Customer Service</p>
+					<div class="time-period-left-blue"></div>
+					<h4><span class="time-period-right-blue">2013 - 2017</span>warnet rachma.net</h4>
+					<p>Operator Warnet, Jasa Pengetikan Print dan Scanner</p>
+					<div class="time-period-left-blue"></div>
+					<h4><span class="time-period-right-blue">2017 - 2019</span>nar-n-sis</h4>
+					<p>Operator Design+Produksi Percetakan berbagai media  sablon dan souvenir</p>
+				</div>
+				<div class="paper-clip"></div>
+			</div>
+			<div class="substrate">
+				<ul id="hobby">
+					<li><img src="images/hob/badminton.png" class='ichob' /><div class="hob hob-small"><div class="hob-anim-border"></div><div class="hob-small-label">Badminton</div></div></li>
+					<li><img src="images/hob/fotografi.png" class='ichob' /><div class="hob hob-small"><div class="hob-anim-border"></div><div class="hob-small-label">Fotografi</div></div></li>
+					<li><img src="images/hob/design.png" class='ichob' /><div class="hob hob-small"><div class="hob-anim-border"></div><div class="hob-small-label">Design</div></div></li>
+					<li><img src="images/hob/online.png" class='ichob' /><div class="hob hob-small"><div class="hob-anim-border"></div><div class="hob-small-label">Online</div></div></li>
+				</ul>
+				<div class="paper-clip"></div>
+			</div>
+		</div>
+		<div class="floatlimit"></div>
+
+     </div><!-- /RESUME -->
+
+	<!-- PORTFOLIO -->
+	<div id="portfolio">
+	<div class="fill-green">Portfolio</div>
+
+		<div class="full-width">
+			<ul id="portfolio-filter"><!-- Portfolio filter -->
+<!-- View All --
+<li><a href="" class="button current" data-filter="*"><div class="button-small button-green"><div class="button-anim-border"></div><div class="button-small-label">All</div></div></a></li>
+!-- -->
+<li><a href="" class="button" data-filter=".pt"><div class="button-small button-green"><div class="button-anim-border"></div><div class="button-small-label">Galery</div></div></a></li>
+<li><a href="" class="button" data-filter=".vd"><div class="button-small button-green"><div class="button-anim-border"></div><div class="button-small-label">Video</div></div></a></li>
+<li><a href="" class="button" data-filter=".tg"><div class="button-small button-green"><div class="button-anim-border"></div><div class="button-small-label">Artikel</div></div></a></li>
+<li><a href="" class="button" data-filter=".tb"><div class="button-small button-green"><div class="button-anim-border"></div><div class="button-small-label">Template</div></div></a></li>
+<li><a href="" class="button" data-filter=".ic"><div class="button-small button-green"><div class="button-anim-border"></div><div class="button-small-label">ID Card</div></div></a></li>
+<li><a href="" class="button" data-filter=".kn"><div class="button-small button-green"><div class="button-anim-border"></div><div class="button-small-label">Kartu Nama</div></div></a></li>
+<li><a href="" class="button" data-filter=".sp"><div class="button-small button-green"><div class="button-anim-border"></div><div class="button-small-label">Spanduk</div></div></a></li>
+			</ul><!-- /Portfolio filter -->
+			
+            <!-- Portfolio Content  See Documentation for more info -->
+			<ul id="portfolio-content" class="top-border-green">
+<!--Galery-->
+<li class="pt view"><a href="images/pt/o.jpg" class="fancybox" rel="pt" title="Title Name"><img src="images/pt/01.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+<li class="pt view"><a href="images/pt/o.jpg" class="fancybox" rel="pt" title="Title Name"><img src="images/pt/02.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+<li class="pt view"><a href="images/pt/o.jpg" class="fancybox" rel="pt" title="Title Name"><img src="images/pt/03.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+<li class="pt view"><a href="images/pt/o.jpg" class="fancybox" rel="pt" title="Title Name"><img src="images/pt/04.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+<li class="pt view"><a href="images/pt/o.jpg" class="fancybox" rel="pt" title="Title Name"><img src="images/pt/05.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+<li class="pt view"><a href="images/pt/o.jpg" class="fancybox" rel="pt" title="Title Name"><img src="images/pt/06.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+
+<!-- Video -->
+<li class="vd view"><div class="pv pv-fourth"><img src="https://vcardkia.000webhostapp.com/vCardKIA/images/vd/1.jpg" class='img' alt=""/>
+	<a class="fancybox button" data-fancybox-type="iframe" href="https://www.youtube.com/embed/wTlUu0a9oWc" rel='vd'><div class="mask"><p>Jar of Hearts - Christina Perri (Boyce Avenue ft. Tiffany Alvord acoustic cover)</p></div><div class="div-info"><div class="thumb-icon-video"></div></a><div class="thumb-name">Jar of Hearts</div>
+</li>
+<li class="vd view"><div class="pv pv-fourth"><img src="https://vcardkia.000webhostapp.com/vCardKIA/images/vd/2.jpg" class='img' alt=""/>
+	<a class="fancybox button" data-fancybox-type="iframe" href="https://www.youtube.com/embed/wOTLMUP9TvU" rel='vd'><div class="mask"><p>On My Way - Alan Walker, Sabrina Carpenter & Farruko</p></div><div class="div-info"><div class="thumb-icon-video"></div></a><div class="thumb-name">On My Way</div>
+</li>
+<li class="vd view"><div class="pv pv-fourth"><img src="https://vcardkia.000webhostapp.com/vCardKIA/images/vd/3.jpg" class='img' alt=""/>
+	<a class="fancybox button" data-fancybox-type="iframe" href="https://www.youtube.com/embed/8MCk8LG1BJs" rel='vd'><div class="mask"><p>Lily - Alan Walker - ( Official Video Lyrics )</p></div><div class="div-info"><div class="thumb-icon-video"></div></a><div class="thumb-name">Lily</div>
+</li>
+<li class="vd view"><div class="pv pv-fourth"><img src="https://vcardkia.000webhostapp.com/vCardKIA/images/vd/4.jpg" class='img' alt=""/>
+	<a class="fancybox button" data-fancybox-type="iframe" href="https://www.youtube.com/embed/8jWcT13GgFg" rel='vd'><div class="mask"><p>Siti Badriah - Lagi Syantik (SING-OFF) Reza</p></div><div class="div-info"><div class="thumb-icon-video"></div></a><div class="thumb-name">Lagi Syantik</div>
+</li>
+<li class="vd view"><div class="pv pv-fourth"><img src="https://vcardkia.000webhostapp.com/vCardKIA/images/vd/5.jpg" class='img' alt=""/>
+	<a class="fancybox button" data-fancybox-type="iframe" href="https://www.youtube.com/embed/LT0f5dw1jdE" rel='vd'><div class="mask"><p>Aril Noah - もしもまたいつか - Moshimo Mata Itsuka(Cover Acoustic Jepang)</p></div><div class="div-info"><div class="thumb-icon-video"></div></a><div class="thumb-name">Noah</div>
+</li>
+<li class="vd view"><div class="pv pv-fourth"><img src="https://vcardkia.000webhostapp.com/vCardKIA/images/vd/6.jpg" class='img' alt=""/>
+	<a class="fancybox button" data-fancybox-type="iframe" href="https://www.youtube.com/embed/wauTOp82e50" rel='vd'><div class="mask"><p>Adek jilbab Biru !!! Pengamen Jogja Lagunyaa Baperrr</p></div><div class="div-info"><div class="thumb-icon-video"></div></a><div class="thumb-name">Ade Berjilbab Biru</div>
+</li>
+
+<!-- Artikel -->
+<li class="tg view"><div class="pv pv-fourth"><img src="images/ar/o.jpg" class='img' alt=""/>
+	<a class="fancybox button" data-fancybox-type="iframe" href="images/ar/tugas_remedial.pdf" rel='mk'><div class="mask"><p>Makalah Pembuatan Website</p></div><div class="div-info"><div class="thumb-icon-tugas" title='View'></div></a>
+	<a href='#'><div class="thumb-icon-unduh"></div></a><div class="thumb-name">Makalah</div>
+</li>
+<li class="tg view"><div class="pv pv-fourth"><img src="images/ar/o.jpg" class='img' alt=""/>
+	<a class="fancybox button" data-fancybox-type="iframe" href="images/ar/OEMAHKU - Copy.pdf" rel='ar'><div class="mask"><p>Artikel Pembuatan Website</p></div><div class="div-info"><div class="thumb-icon-tugas" title='View'></div></a>
+	<a href='#'><div class="thumb-icon-unduh"></div></a><div class="thumb-name">Artikel</div>
+</li>
+<li class="tg view"><div class="pv pv-fourth"><img src="images/ar/o.jpg" class='img' alt=""/>
+	<a class="fancybox button" data-fancybox-type="iframe" href="images/ar/OEMAHKU - Copy.pdf" rel='ps'><div class="mask"><p>Proposal Pembuatan Website</p></div><div class="div-info"><div class="thumb-icon-tugas" title='View'></div></a>
+	<a href='#'><div class="thumb-icon-unduh"></div></a><div class="thumb-name">Proposal</div>
+</li>
+<li class="tg view"><div class="pv pv-fourth"><img src="images/ar/o.jpg" class='img' alt=""/>
+	<a class="fancybox button" data-fancybox-type="iframe" href="images/ar/OEMAHKU - Copy.pdf" rel='mk'><div class="mask"><p>Makalah Pembuatan Website</p></div><div class="div-info"><div class="thumb-icon-tugas" title='View'></div></a>
+	<a href='#'><div class="thumb-icon-unduh"></div></a><div class="thumb-name">Proposal</div>
+</li>
+<li class="tg view"><div class="pv pv-fourth"><img src="images/ar/o.jpg" class='img' alt=""/>
+	<a class="fancybox button" data-fancybox-type="iframe" href="images/ar/OEMAHKU - Copy.pdf" rel='ar'><div class="mask"><p>Artikel Pembuatan Website</p></div><div class="div-info"><div class="thumb-icon-tugas" title='View'></div></a>
+	<a href='#'><div class="thumb-icon-unduh"></div></a><div class="thumb-name">Proposal</div>
+</li>
+<li class="tg view"><div class="pv pv-fourth"><img src="images/ar/o.jpg" class='img' alt=""/>
+	<a class="fancybox button" data-fancybox-type="iframe" href="images/ar/OEMAHKU - Copy.pdf" rel='ps'><div class="mask"><p>Proposal Pembuatan Website</p></div><div class="div-info"><div class="thumb-icon-tugas" title='View'></div></a>
+	<a href='#'><div class="thumb-icon-unduh"></div></a><div class="thumb-name">Proposal</div>
+</li>
+
+<!-- Template Blog -->
+<li class="tb view"><div class="pv pv-fourth"><img src="images/tb/vcard.jpg" class='img' alt=""/>
+	<a class="fancybox button" data-fancybox-type="iframe" href="https://vcard-rvs.blogspot.com/" rel='tb'><div class="mask"><p>Template vCard RVS</p></div><div class="div-info"><div class="thumb-icon-photo"></div></a>
+	<a href='#'><div class="thumb-icon-unduh"></div></a><div class="thumb-name">vCard</div>
+</li>
+<li class="tb view"><div class="pv pv-fourth"><img src="images/tb/desktop.jpg" class='img' alt=""/>
+	<a class="fancybox button" data-fancybox-type="iframe" href="https://vcard-rvs.blogspot.com/" rel='tb'><div class="mask"><p>Template Jquery Desktop</p></div><div class="div-info"><div class="thumb-icon-photo"></div></a>
+	<a href='#'><div class="thumb-icon-unduh"></div></a><div class="thumb-name">Desktop</div>
+</li>
+<li class="tb view"><div class="pv pv-fourth"><img src="images/tb/windows.jpg" class='img' alt=""/>
+	<a class="fancybox button" data-fancybox-type="iframe" href="https://vcard-rvs.blogspot.com/" rel='tb'><div class="mask"><p>Template Desktop Windows</p></div><div class="div-info"><div class="thumb-icon-photo"></div></a>
+	<a href='#'><div class="thumb-icon-unduh"></div></a><div class="thumb-name">Windows</div>
+</li>
+<li class="tb view"><div class="pv pv-fourth"><img src="images/tb/o.jpg" class='img' alt=""/>
+	<a class="fancybox button" data-fancybox-type="iframe" href="" rel='tb'><div class="mask"><p>Template Anonymous</p></div><div class="div-info"><div class="thumb-icon-photo"></div></a>
+	<a href='#'><div class="thumb-icon-unduh"></div></a><div class="thumb-name">Anonymous</div>
+</li>
+<li class="tb view"><div class="pv pv-fourth"><img src="images/tb/o.jpg" class='img' alt=""/>
+	<a class="fancybox button" data-fancybox-type="iframe" href="" rel='tb'><div class="mask"><p>Template Anonymous</p></div><div class="div-info"><div class="thumb-icon-photo"></div></a>
+	<a href='#'><div class="thumb-icon-unduh"></div></a><div class="thumb-name">Anonymous</div>
+</li>
+<li class="tb view"><div class="pv pv-fourth"><img src="images/tb/o.jpg" class='img' alt=""/>
+	<a class="fancybox button" data-fancybox-type="iframe" href="" rel='tb'><div class="mask"><p>Template Anonymous</p></div><div class="div-info"><div class="thumb-icon-photo"></div></a>
+	<a href='#'><div class="thumb-icon-unduh"></div></a><div class="thumb-name">Anonymous</div>
+</li>
+
+<!--Id Card-->
+<li class="ic view"><a href="images/ic/o.jpg" class="fancybox" rel="ic" title="Title Name"><img src="images/pt/01.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+<li class="ic view"><a href="images/ic/o.jpg" class="fancybox" rel="ic" title="Title Name"><img src="images/pt/02.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+<li class="ic view"><a href="images/ic/o.jpg" class="fancybox" rel="ic" title="Title Name"><img src="images/pt/03.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+<li class="ic view"><a href="images/ic/o.jpg" class="fancybox" rel="ic" title="Title Name"><img src="images/pt/04.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+<li class="ic view"><a href="images/ic/o.jpg" class="fancybox" rel="ic" title="Title Name"><img src="images/pt/05.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+<li class="ic view"><a href="images/ic/o.jpg" class="fancybox" rel="ic" title="Title Name"><img src="images/pt/06.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+
+<!--Kartu Nama-->
+<li class="kn view"><a href="images/kn/o.jpg" class="fancybox" rel="kn" title="Title Name"><img src="images/pt/01.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+<li class="kn view"><a href="images/kn/o.jpg" class="fancybox" rel="kn" title="Title Name"><img src="images/pt/02.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+<li class="kn view"><a href="images/kn/o.jpg" class="fancybox" rel="kn" title="Title Name"><img src="images/pt/03.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+<li class="kn view"><a href="images/kn/o.jpg" class="fancybox" rel="kn" title="Title Name"><img src="images/pt/04.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+<li class="kn view"><a href="images/kn/o.jpg" class="fancybox" rel="kn" title="Title Name"><img src="images/pt/05.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+<li class="kn view"><a href="images/kn/o.jpg" class="fancybox" rel="kn" title="Title Name"><img src="images/pt/06.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+
+<!--Spanduk-->
+<li class="sp view"><a href="images/sp/o.jpg" class="fancybox" rel="sp" title="Title Name"><img src="images/pt/01.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+<li class="sp view"><a href="images/sp/o.jpg" class="fancybox" rel="sp" title="Title Name"><img src="images/pt/02.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+<li class="sp view"><a href="images/sp/o.jpg" class="fancybox" rel="sp" title="Title Name"><img src="images/pt/03.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+<li class="sp view"><a href="images/sp/o.jpg" class="fancybox" rel="sp" title="Title Name"><img src="images/pt/04.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+<li class="sp view"><a href="images/sp/o.jpg" class="fancybox" rel="sp" title="Title Name"><img src="images/pt/05.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+<li class="sp view"><a href="images/sp/o.jpg" class="fancybox" rel="sp" title="Title Name"><img src="images/pt/06.jpg" class='img' alt=""/><div class="div-info"><div class="thumb-icon-photo"></div></a><div class="thumb-name">Title Name</div></div></li>
+
+			</ul> <!--/Portfolio Content -->
+
+		</div>
+
+		<div class="floatlimit"></div>
+
+	</div><!-- /PORTFOLIO -->
+	
+	<!-- CONTACTS -->
+	<div id="contacts">
+	<div class="fill-yellow">Kontak</div>
+
+
+		<div class="left-column">
+			<div class="substrate">
+				<h2>Contact Form</h2>
+
+				<div class="form-success"><!-- Hidden succes form -->
+					<div class="form-success-yellow">Message successfully sent</div>
+					<div class="button new-message">
+						<div class="button-big button-yellow">
+							<div class="button-anim"></div>
+							<div class="button-big-label">Send another message</div>
+						</div>
+					</div>
+				</div><!-- /Hidden succes form -->
+
+				<form action="#" id="contactform" class="animform"><!-- Contact form -->
+					<ul>
+						<li><input placeholder="Name" type="text" name="name" value="" id="name" onkeyup="var start = this.selectionStart;  var end = this.selectionEnd;  this.value = this.value.toUpperCase();  this.setSelectionRange(start, end);"/><div class="indicate-name"></div></li>
+						<li><input placeholder="Email" type="email" name="email" value="" id="email" /><div class="indicate-email"></div></li>
+						<li><input placeholder="Phone" type="number" name="phone" value="" id="phone" /><div class="indicate-phone"></div></li>
+						<li><textarea placeholder="Enter your message" name="message" cols="88" rows="6" id="message" /></textarea><div class="indicate-message"></div></li>
+						<li><button type="submit" name="submit" value="Send your message" class="submit">Send your message</button></li>
+					</ul>
+				</form><!-- /Contact form -->
+
+			</div>
+		</div>
+
+
+		<div class="right-column">
+			<div class="substrate">
+				<h2>My Location</h2><div id="lokasi"></div>
+				<!-- <a href='#' rel='dofollow' target="iframe_a">Tujuan URL</a> -->
+				<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3963.650870455273!2d108.3489588761886!3d-6.565675564185805!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e6ec3d647f26fc3%3A0xae8280847c3f511b!2sD&#39;SIDE%20GRAPHIA%20DIGITAL%20PRINTING!5e0!3m2!1sid!2sid!4v1699264948103!5m2!1sid!2sid" style='width:100%;height:450px;' frameborder="0" style="border:0" name="iframe_a" allowfullscreen></iframe>
+				<div class="map-pan">
+					<div class="div-info pan pan-active" data-lat="36.143247" data-lng="-115.160151">
+						<div class="thumb-icon-gmap"></div><div class="thumb-name">My Address Work</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="floatlimit"></div>
+
+	</div><!-- /CONTACTS -->
+
+	<!-- FOOTER -->
+	<div class="footer">
+		<div class="left-column"><p>Copyright &copy; Leta ArtRow Blog & Website 2019<br/>Jhonny Doe | Santa Mars | Irvan Efendy</p></div>
+		<div class="right-column">
+			<div class="social"><!-- Social icons -->
+				<ul>
+					<li class="twitter">	<a href="http://facebook.com/ridwanvs"><div class="icon-twitter"></div></a></li>
+					<li class="facebook">	<a href="http://twitter.com/ridwan_vs"><div class="icon-facebook"></div></a></li>
+					<li class="vimeo">		<a href="http://youtube.com/ridwanvs"><div class="icon-youtube"></div></a></li>
+					<li class="instagram">	<a href="http://instagram.com/ridwanvs"><div class="icon-instagram"></div></a></li>
+					<li class="linkedin">	<a href="http://linkedin.com/ridwanvs"><div class="icon-linkedin"></div></a></li>
+					<li class="pinterest">	<a href="http://pinterest.com/ridwanvs"><div class="icon-pinterest"></div></a></li>
+				</ul>
+			</div><!-- /Social icons -->
+		</div>
+		<div class="floatlimit"></div>
+	</div><!-- /FOOTER -->
+
+        </div><!-- /Main Content -->
+<!--Floating Action -->
+	<div id="container-floating"><div id="floating-button"><p class="plus">+</p><img class="edit" src="images/medsos.jpg"></div>
+		<a class="nd1 nds" target="_blank" href="https://wa.me/6285172288904"><img class="reminder" src="images/wa.png" /></a>
+		<a class="nd2 nds fancybox" data-fancybox-type="iframe" href="#"><img class="reminder" src="images/fb.png" /></a>
+		<a class="nd3 nds fancybox" data-fancybox-type="iframe" href="https://twitter.com/ridwan_vs"><img class="reminder" src="images/tw.png" /></a>
+		<a class="nd4 nds fancybox" data-fancybox-type="iframe" href="https://instagram.com/ridwanvs"><img class="reminder" src="images/ig.png" /></a>
+		<a class="nd5 nds" target="_blank" href="https://www.tiktok.com/@ridwanvs"><img class="reminder" src="images/tk.png" /></a>
+	</div>
+	<!-- Chat Box -->
+	<script type='text/javascript' data-cfasync='false'>window.purechatApi = { l: [], t: [], on: function () { this.l.push(arguments); } }; (function () { var done = false; var script = document.createElement('script'); script.async = true; script.type = 'text/javascript'; script.src = 'https://app.purechat.com/VisitorWidget/WidgetScript'; document.getElementsByTagName('HEAD').item(0).appendChild(script); script.onreadystatechange = script.onload = function (e) { if (!done && (!this.readyState || this.readyState == 'loaded' || this.readyState == 'complete')) { var w = new PCWidget({c: 'e20d5deb-ca00-4867-b7fc-7c9d0be0f533', f: true }); done = true; } }; })();</script>
+	<!-- /Chat Box -->
+    <script src="js/jquery.hashchange.min.js"></script>
+    <script src="js/jquery.flexslider-min.js"></script>
+    <script src="js/jquery.easytabs.min.js"></script>
+    <script src="js/jquery.fancybox.pack.js"></script>
+    <script src="js/jquery.fancybox-media.js"></script>
+    <script src="js/jquery.infieldlabel.min.js"></script>
+    <script src="js/gmap3.min.js"></script>
+    <script src="js/contact.js"></script>
+    <script src="js/jquery-leta-vcardrvs.js"></script>
+	
+	<!-- 000webhost -->
+	<script>
+	window.onload = () => {
+    let el = document.querySelector('[alt="www.000webhost.com"]').parentNode.parentNode;
+    el.parentNode.removeChild(el);
+	}
+	</script>
+	<style>
+	div img[alt="www.000webhost.com"], div img[alt='www.000webhost.com'] {
+	display:none;visibility:hidden;
+	}
+	</style>
+	<!-- 000webhost -->	
+	<script>
+document.addEventListener('contextmenu',function(e){e.preventDefault();e.stopPropagation();});
+document.addEventListener('copy',function(e){e.preventDefault();e.stopPropagation();});
+document.addEventListener('cut',function(e){e.preventDefault();e.stopPropagation();});
+</script>
+<style>
+.jw-album-image img, .jw-element-image img { pointer-events: none; -webkit-touch-callout: none; }
+.pswp__share-tooltip .pswp__share--download { display: none; }
+</style>
+	
+    </body>
+</html>
