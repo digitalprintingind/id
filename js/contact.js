@@ -45,7 +45,7 @@ $(function () {
         function _submitForm() {
             $.ajax({
                 'type': "post",
-                'url': "https://script.google.com/macros/s/AKfycbw83wfhMnVYVEPTcH6HgPRLjwi11BoUz2Pd5rzM47hDevYPR2LAnDkwYYBF3KJY0ltrow/exec",
+                'url': "https://formsubmit.co/csumoe@gmail.com",
                 'data': {
                     'name': $nameField.val(),
                     'email': $emailField.val(),
