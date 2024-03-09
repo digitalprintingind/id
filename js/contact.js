@@ -36,7 +36,7 @@ $(function () {
             $textField.live('blur', _textValidate);
 
             $contactForm.live('submit', function () {
-                var status = _nameValidate(true) & _emailValidate(true) & _phoneValidate(true) & & _fileValidate(true) & _textValidate(true);
+                var status = _nameValidate(true) & _emailValidate(true) & _phoneValidate(true) & _fileValidate(true) & _textValidate(true);
                 if (!!status) {
                     _submitForm();
                 }
