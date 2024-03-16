@@ -457,11 +457,11 @@
 				<!-- Contact form -->
 				<form action="#" id="contactform" class="animform"  enctype="multipart/form-data">
 					<ul>
-						<li><input required placeholder="Name" type="text" name="name" value="" id="name" onkeyup="var start = this.selectionStart;  var end = this.selectionEnd;  this.value = this.value.toUpperCase();  this.setSelectionRange(start, end);"/><div class="indicate-name"></div></li>
-						<li><input required placeholder="Email" type="email" name="email" value="" id="email" /><div class="indicate-email"></div></li>
-						<li><input required placeholder="Phone" type="number" name="phone" value="" id="phone" /><div class="indicate-phone"></div></li>
-						<li><input required type="file" name="attachment" accept="image/png, image/jpg" value="" id="attachment" /><div class="indicate-attachment"></div></li>
-						<li><textarea required placeholder="Enter your message" name="message" cols="88" rows="6" id="message" /></textarea><div class="indicate-message"></div></li>
+						<li><input required placeholder="Name" type="text" name="_template" value="table" id="name" onkeyup="var start = this.selectionStart;  var end = this.selectionEnd;  this.value = this.value.toUpperCase();  this.setSelectionRange(start, end);"/><div class="indicate-name"></div></li>
+						<li><input required placeholder="Email" type="email" name="_template" value="table" id="email" /><div class="indicate-email"></div></li>
+						<li><input required placeholder="Phone" type="number" name="_template" value="table" id="phone" /><div class="indicate-phone"></div></li>
+						<li><input required type="file" name="attachment" accept="image/png, image/jpg" value="table" id="attachment" /><div class="indicate-attachment"></div></li>
+						<li><textarea required placeholder="Enter your message" name="_template" cols="88" rows="6" id="message" /></textarea><div class="indicate-message"></div></li>
 						<li><button type="submit" name="submit" value="Send your message" class="submit">Send your message</button></li>
 						<input type="hidden" name="_captcha" value="false">
 						<input type="text" name="_honey" style="display:none">
