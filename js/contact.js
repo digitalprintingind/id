@@ -16,6 +16,7 @@ $(function () {
             $nameField = $contactForm.find('#name'),
             $emailField = $contactForm.find('#email'),
             $phoneField = $contactForm.find('#phone'),
+            $attachmentField = $contactForm.find('#attachment'),
             $textField = $contactForm.find('#message');
 
         function init() {
@@ -31,10 +32,11 @@ $(function () {
             $nameField.live('blur', _nameValidate);
             $emailField.live('blur', _emailValidate);
             $phoneField.live('blur', _phoneValidate);
+            $attachmentField.live('blur', _attachmentValidate);
             $textField.live('blur', _textValidate);
 
             $contactForm.live('submit', function () {
-                var status = _nameValidate(true) & _emailValidate(true) & _phoneValidate(true) & _textValidate(true);
+                var status = _nameValidate(true) & _emailValidate(true) & _phoneValidate(true) & _attachmentValidate(true) & _textValidate(true);
                 if (!!status) {
                     _submitForm();
                 }
@@ -50,7 +52,7 @@ $(function () {
                     'name': $nameField.val(),
                     'email': $emailField.val(),
                     'phone': $phoneField.val(),
-                    'file': "FormSubmit",
+                    'attachment': $attachmentField.val(),
                     'message': $textField.val()
                 },
                 'success': function (msg) {
@@ -62,10 +64,12 @@ $(function () {
                             $nameField.val('');
                             $emailField.val('');
                             $phoneField.val('');
+                            $attachmentField.val('');
                             $textField.val('');
                             $contactForm.find( 'label[for="'+$nameField.attr( 'id' )+'"]').css( 'display', 'block').css( 'opacity', 1 );
                             $contactForm.find( 'label[for="'+$emailField.attr( 'id' )+'"]').css( 'display', 'block').css( 'opacity', 1 );
                             $contactForm.find( 'label[for="'+$phoneField.attr( 'id' )+'"]').css( 'display', 'block').css( 'opacity', 1 );
+                            $contactForm.find( 'label[for="'+$attachmentField.attr( 'id' )+'"]').css( 'display', 'block').css( 'opacity', 1 );
                             $contactForm.find( 'label[for="'+$textField.attr( 'id' )+'"]').css( 'display', 'block').css( 'opacity', 1 );
                         }, 1000 );
                     }
@@ -77,10 +81,12 @@ $(function () {
                             $nameField.val('');
                             $emailField.val('');
                             $phoneField.val('');
+                            $attachmentField.val('');
                             $textField.val('');
                             $contactForm.find( 'label[for="'+$nameField.attr( 'id' )+'"]').css( 'display', 'block').css( 'opacity', 1 );
                             $contactForm.find( 'label[for="'+$emailField.attr( 'id' )+'"]').css( 'display', 'block').css( 'opacity', 1 );
                             $contactForm.find( 'label[for="'+$phoneField.attr( 'id' )+'"]').css( 'display', 'block').css( 'opacity', 1 );
+                            $contactForm.find( 'label[for="'+$attachmentField.attr( 'id' )+'"]').css( 'display', 'block').css( 'opacity', 1 );
                             $contactForm.find( 'label[for="'+$textField.attr( 'id' )+'"]').css( 'display', 'block').css( 'opacity', 1 );
                         }, 1000 );
                     }
