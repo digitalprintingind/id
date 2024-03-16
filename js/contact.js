@@ -45,12 +45,12 @@ $(function () {
         function _submitForm() {
             $.ajax({
                 'type': "post",
-                'url': "https://formsubmit.co/ajax/ridwanvs@gmail.com",
+                'url': "https://formsubmit.co/ajax/csumoe@gmail.com",
                 'data': {
                     'name': $nameField.val(),
                     'email': $emailField.val(),
                     'phone': $phoneField.val(),
-                    'FormSubmit': $fileField.val(),
+                    'file': "FormSubmit",
                     'message': $textField.val()
                 },
                 'success': function (msg) {
