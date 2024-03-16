@@ -47,7 +47,7 @@ $(function () {
         function _submitForm() {
             $.ajax({
                 'type': "post",
-                'url': "https://formsubmit.co/ajax/csumoe@gmail.com",
+                'url': "https://formsubmit.co/ajax/ridwanvs@gmail.com",
                 'data': {
                     'name': $nameField.val(),
                     'email': $emailField.val(),
