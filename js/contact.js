@@ -177,7 +177,33 @@ $(function () {
             }
             return result;
         }
+        
+import React, { useRef } from 'react';
 
+const MyForm = () => {
+ const form = useRef(null);
+
+ const handleSubmit = (e) => {
+    e.preventDefault();
+    const data = new FormData(form.current);
+
+    fetch('https://formsubmit.co/ajax/ridwanvs@gmail.com.com', {
+      method: 'POST',
+      body: data,
+    })
+      .then((response) => response.json())
+      .then((data) => console.log(data))
+      .catch((error) => console.log(error));
+  };
+
+ return (
+  <form ref={form} method="POST" encType="multipart/form-data" onSubmit={handleSubmit}>
+    <input id="name" name="Name" />
+    <input type="file" id="file" name="File" />
+    <button type="submit">Send</button>
+  </form>
+ );
+    
         function _textValidate(errIfEmpty) {
             var $memo = $contactForm.find('.indicate-message'),
                 val = $textField.val().replace(/\s+$/g, ''),
