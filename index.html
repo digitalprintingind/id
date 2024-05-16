@@ -455,12 +455,12 @@
 				</div><!-- /Hidden succes form -->
 
 				<!-- Contact form -->
-				<form action="#" id="contactform" class="animform" method="POST" enctype="multipart/form-data">
+				<form action="#" id="contactform" class="animform" method="POST">
 					<ul>
 						<li><input required placeholder="Name" type="text" name="Name" value="" id="name" onkeyup="var start = this.selectionStart;  var end = this.selectionEnd;  this.value = this.value.toUpperCase();  this.setSelectionRange(start, end);"/><div class="indicate-name"></div></li>
 						<li><input required placeholder="Email" type="email" name="Email" value="" id="email" /><div class="indicate-email"></div></li>
 						<li><input required placeholder="Phone" type="number" name="Phone" value="" id="phone" /><div class="indicate-phone"></div></li>
-						</li><input type="file" name="attachment" accept="image/png, image/jpeg" /><div class="indicate-file"></div></li>
+						<li><input required placeholder="Url" type="url" name="Url" value="" id="url" /><div class="indicate-url"></div></li>
 						<li><textarea required placeholder="Enter your message" name="_template" cols="88" rows="6" id="message" /></textarea><div class="indicate-message"></div></li>
 						<li><button type="submit" name="submit" value="Send your message" class="submit">Send your message</button></li>
 						<input type="hidden" name="_captcha" value="false">
