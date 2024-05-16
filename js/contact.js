@@ -177,15 +177,6 @@ $(function () {
             }
             return result;
         }
-
- return (
-  <form ref={form} method="POST" encType="multipart/form-data" onSubmit={handleSubmit}>
-    <input id="name" name="Name" />
-    <input type="file" id="file" name="File" />
-    <button type="submit">Send</button>
-  </form>
- );
-};
     
         function _textValidate(errIfEmpty) {
             var $memo = $contactForm.find('.indicate-message'),
