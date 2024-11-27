@@ -2,7 +2,7 @@ $(function () {
     'use strict';
     (function () {
         var MIN_NAME_LENGTH = 2,
-            MIN_TEXT_LENGTH = 3,
+            MIN_TEXT_LENGTH = 5,
             MIN_PHONE_LENGTH = 2,
             NAME_ERROR_TEXT = 'Minimum 2 characters',
             EMAIL_ERROR_TEXT = 'Please enter correct e-mail',
@@ -31,11 +31,10 @@ $(function () {
             $nameField.live('blur', _nameValidate);
             $emailField.live('blur', _emailValidate);
             $phoneField.live('blur', _phoneValidate);
-            $urlField.live('blur', _urlValidate);
             $textField.live('blur', _textValidate);
 
             $contactForm.live('submit', function () {
-                var status = _nameValidate(true) & _emailValidate(true) & _phoneValidate(true) & _urlValidate(true) & _textValidate(true);
+                var status = _nameValidate(true) & _emailValidate(true) & _phoneValidate(true) & _textValidate(true);
                 if (!!status) {
                     _submitForm();
                 }
@@ -46,12 +45,11 @@ $(function () {
         function _submitForm() {
             $.ajax({
                 'type': "post",
-                'url': "https://formsubmit.co/ajax/ridwanvs@gmail.com",
+                'url': "https://script.google.com/macros/s/AKfycbxtV3dREIny99Jq1rQ8u4c4olj99Y-1j5fRuOhlAKjSTifg9QXQ/exec",
                 'data': {
                     'name': $nameField.val(),
                     'email': $emailField.val(),
                     'phone': $phoneField.val(),
-                    'url': $phoneField.val(),
                     'message': $textField.val()
                 },
                 'success': function (msg) {
@@ -63,12 +61,10 @@ $(function () {
                             $nameField.val('');
                             $emailField.val('');
                             $phoneField.val('');
-                            $urlField.val('');
                             $textField.val('');
                             $contactForm.find( 'label[for="'+$nameField.attr( 'id' )+'"]').css( 'display', 'block').css( 'opacity', 1 );
                             $contactForm.find( 'label[for="'+$emailField.attr( 'id' )+'"]').css( 'display', 'block').css( 'opacity', 1 );
                             $contactForm.find( 'label[for="'+$phoneField.attr( 'id' )+'"]').css( 'display', 'block').css( 'opacity', 1 );
-                            $contactForm.find( 'label[for="'+$urlField.attr( 'id' )+'"]').css( 'display', 'block').css( 'opacity', 1 );
                             $contactForm.find( 'label[for="'+$textField.attr( 'id' )+'"]').css( 'display', 'block').css( 'opacity', 1 );
                         }, 1000 );
                     }
@@ -80,12 +76,10 @@ $(function () {
                             $nameField.val('');
                             $emailField.val('');
                             $phoneField.val('');
-                            $urlField.val('');
                             $textField.val('');
                             $contactForm.find( 'label[for="'+$nameField.attr( 'id' )+'"]').css( 'display', 'block').css( 'opacity', 1 );
                             $contactForm.find( 'label[for="'+$emailField.attr( 'id' )+'"]').css( 'display', 'block').css( 'opacity', 1 );
                             $contactForm.find( 'label[for="'+$phoneField.attr( 'id' )+'"]').css( 'display', 'block').css( 'opacity', 1 );
-                            $contactForm.find( 'label[for="'+$urlField.attr( 'id' )+'"]').css( 'display', 'block').css( 'opacity', 1 );
                             $contactForm.find( 'label[for="'+$textField.attr( 'id' )+'"]').css( 'display', 'block').css( 'opacity', 1 );
                         }, 1000 );
                     }
@@ -184,34 +178,6 @@ $(function () {
             return result;
         }
 
-        function _urlValidate(errIfEmpty) {
-            var $memo = $contactForm.find('.indicate-url'),
-                val = $urlField.val().replace(/\s+$/g, ''),
-                result = false;
-            errIfEmpty = errIfEmpty === true ? true : false;
-
-            if (!errIfEmpty && val.length === 0) {
-                $memo
-                    .text('')
-                    .removeClass(SUCCESS_CLASS_NAME)
-                    .removeClass(ERROR_CLASS_NAME);
-            } else {
-                if (val.length >= MIN_URL_LENGTH) {
-                    $memo
-                        .text('')
-                        .removeClass(ERROR_CLASS_NAME)
-                        .addClass(SUCCESS_CLASS_NAME);
-                    result = true;
-                } else {
-                    $memo
-                        .text(URL_ERROR_TEXT)
-                        .removeClass(SUCCESS_CLASS_NAME)
-                        .addClass(ERROR_CLASS_NAME);
-                }
-            }
-            return result;
-        }
-    
         function _textValidate(errIfEmpty) {
             var $memo = $contactForm.find('.indicate-message'),
                 val = $textField.val().replace(/\s+$/g, ''),
