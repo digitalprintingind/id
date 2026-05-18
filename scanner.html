@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C-O_Scanner_v2</title>
+    <title>Scanner AI Web Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
@@ -21,12 +19,6 @@
         
         #camera-feed { object-fit: cover; }
         .mirror-view { transform: scaleX(-1); }
-        
-        .canvas-container {
-            position: relative;
-            user-select: none;
-            touch-action: none;
-        }
     </style>
 </head>
 <body class="text-gray-100 min-h-screen flex flex-col justify-between">
@@ -37,12 +29,9 @@
                 <div class="bg-indigo-600 p-2 rounded-xl ai-glow">
                     <i class="fa-solid fa-wand-magic-sparkles text-lg text-white"></i>
                 </div>
-                <span class="text-lg font-bold tracking-wider bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">SCANNER.AI</span>
+                <span class="text-lg font-bold tracking-wider bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">SCANNER</span>
             </div>
             <div class="flex items-center gap-4">
-                <button onclick="openModal('info-modal')" class="text-gray-500 hover:text-gray-300 transition cursor-pointer">
-                    <i class="fa-solid fa-circle-info text-lg"></i>
-                </button>
                 <span id="ui-cr" class="text-xs text-gray-700 font-mono select-none"></span>
             </div>
         </div>
@@ -69,30 +58,23 @@
             </div>
         </div>
 
-        <div id="camera-zone" class="w-full max-w-md bg-gray-900 border border-gray-800 rounded-3xl p-4 hidden ai-glow overflow-hidden relative">
-            <div class="relative rounded-2xl overflow-hidden border border-gray-700 bg-black aspect-[3/4]">
-                <video id="camera-feed" autoplay playsinline class="w-full h-full object-cover"></video>
-                <div class="absolute inset-8 border-2 border-indigo-400/50 rounded-lg pointer-events-none z-10">
-                    <div class="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-indigo-400 -translate-x-1 -translate-y-1"></div>
-                    <div class="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-indigo-400 translate-x-1 -translate-y-1"></div>
-                    <div class="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-indigo-400 -translate-x-1 translate-y-1"></div>
-                    <div class="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-indigo-400 translate-x-1 translate-y-1"></div>
-                </div>
-            </div>
-
-            <div class="mt-3 flex justify-between items-center bg-gray-950 p-2 rounded-xl border border-gray-800">
-                <span class="text-xs text-gray-400 px-2">Mode Kamera</span>
-                <button onclick="switchCamera()" class="text-xs bg-gray-800 hover:bg-gray-700 text-indigo-400 px-3 py-1.5 rounded-lg transition cursor-pointer">
-                    <i class="fa-solid fa-camera-rotate mr-1"></i> Balik Kamera
+        <div id="camera-zone" class="fixed inset-0 z-50 bg-black flex flex-col hidden">
+            <div class="absolute top-0 left-0 w-full p-4 z-20 flex justify-between items-start">
+                <button onclick="resetApp()" class="bg-black/50 hover:bg-black/70 text-white px-4 py-2.5 rounded-full backdrop-blur-md transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-arrow-left"></i> Kembali
+                </button>
+                <button onclick="switchCamera()" class="bg-black/50 hover:bg-black/70 text-white w-12 h-12 rounded-full backdrop-blur-md transition flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-camera-rotate text-lg"></i>
                 </button>
             </div>
             
-            <div class="flex justify-center gap-4 mt-4">
-                <button onclick="resetApp()" class="bg-gray-700 hover:bg-gray-600 text-white px-5 py-3 rounded-xl cursor-pointer transition">
-                    <i class="fa-solid fa-xmark mr-2"></i>Batal
-                </button>
-                <button onclick="takePhoto()" class="flex-grow bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-3 rounded-xl cursor-pointer transition shadow-lg shadow-indigo-500/30">
-                    <i class="fa-solid fa-circle-dot mr-2"></i>Tangkap Gambar
+            <div class="relative flex-grow flex items-center justify-center overflow-hidden z-0">
+                <video id="camera-feed" autoplay playsinline class="w-full h-full object-cover"></video>
+            </div>
+
+            <div class="absolute bottom-0 left-0 w-full p-8 pb-12 flex justify-center bg-gradient-to-t from-black/90 to-transparent z-20">
+                <button onclick="takePhoto()" class="w-20 h-20 bg-indigo-600 hover:bg-indigo-500 rounded-full border-4 border-white/50 flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.5)] transition-all cursor-pointer transform hover:scale-105 active:scale-95">
+                    <i class="fa-solid fa-camera text-2xl text-white"></i>
                 </button>
             </div>
         </div>
@@ -104,105 +86,74 @@
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                     </span>
-                    <span class="text-sm font-semibold text-emerald-400 uppercase tracking-wider">AI Studio Preview & Editor</span>
+                    <span class="text-sm font-semibold text-emerald-400 uppercase tracking-wider" id="editor-title-status">AI Scanner Preview</span>
                 </div>
-                <button onclick="resetApp()" class="text-sm text-gray-500 hover:text-red-400 transition cursor-pointer">
-                    <i class="fa-solid fa-rotate-left mr-1"></i> Ulangi
-                </button>
+                <div class="flex gap-3 items-center">
+                    <span class="text-xs text-gray-500 hidden sm:inline"><i class="fa-solid fa-magnifying-glass text-gray-600"></i> Usap 2 jari / Scroll zoom</span>
+                    <button onclick="resetApp()" class="text-sm text-gray-500 hover:text-red-400 transition cursor-pointer">
+                        <i class="fa-solid fa-rotate-left mr-1"></i> Ulangi
+                    </button>
+                </div>
             </div>
 
-            <div class="relative rounded-2xl overflow-hidden border border-gray-700 bg-black flex justify-center items-center mb-4 max-h-[480px]">
-                <div class="canvas-container" id="canvas-wrap">
-                    <canvas id="output-canvas" class="max-w-full max-h-[480px] object-contain"></canvas>
+            <div class="relative overflow-hidden w-full h-[480px] bg-gray-950 rounded-xl border border-gray-700 mb-4 flex items-center justify-center" id="view-window">
+                
+                <div id="canvas-wrap" style="position: relative; transform-origin: center center;">
+                    <canvas id="output-canvas" class="block shadow-2xl"></canvas>
+                    <canvas id="overlay-canvas" class="absolute top-0 left-0 w-full h-full pointer-events-none"></canvas>
                 </div>
+
                 <div id="ai-loading" class="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3 hidden z-20">
                     <i class="fa-solid fa-circle-notch animate-spin text-3xl text-indigo-500"></i>
-                    <p class="text-sm text-gray-300 font-mono">AI Studio Refining Edge & Backlight...</p>
+                    <p class="text-sm text-gray-300 font-mono">Memproses...</p>
                 </div>
-            </div>
 
-            <div class="grid grid-cols-2 gap-3 mb-4" id="normal-editor-tools">
-                <button onclick="rotateImage()" class="bg-gray-800 hover:bg-gray-700 text-gray-200 p-2.5 rounded-xl transition text-xs font-semibold cursor-pointer flex items-center justify-center gap-2 border border-gray-700">
-                    <i class="fa-solid fa-rotate text-indigo-400"></i> Putar Foto 90&deg;
-                </button>
-                <button onclick="startCropMode()" class="bg-gray-800 hover:bg-gray-700 text-gray-200 p-2.5 rounded-xl transition text-xs font-semibold cursor-pointer flex items-center justify-center gap-2 border border-gray-700">
-                    <i class="fa-solid fa-crop-simple text-purple-400"></i> Potong Gambar (Crop)
+                <button onclick="triggerResetView()" class="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md border border-gray-700 hover:bg-gray-800 px-3 py-2 rounded-xl text-xs font-semibold transition z-10 text-indigo-400 cursor-pointer shadow-lg">
+                    <i class="fa-solid fa-expand mr-1"></i> Reset View
                 </button>
             </div>
 
-            <div class="grid grid-cols-2 gap-3 mb-4 hidden" id="crop-active-tools">
-                <button onclick="cancelCrop()" class="bg-gray-800 hover:bg-gray-700 text-red-400 p-3 rounded-xl transition text-xs font-bold cursor-pointer flex items-center justify-center gap-2 border border-red-900/30">
-                    <i class="fa-solid fa-ban"></i> Batal Crop
+            <div class="grid grid-cols-4 gap-2 mb-5" id="normal-editor-tools">
+                <button onclick="rotateImage()" class="bg-gray-800 hover:bg-gray-700 text-gray-200 p-2.5 rounded-xl transition text-xs font-semibold cursor-pointer flex flex-col items-center justify-center gap-1 border border-gray-700">
+                    <i class="fa-solid fa-rotate text-indigo-400 text-base"></i>
                 </button>
-                <button onclick="applyCrop()" class="bg-purple-600 hover:bg-purple-500 text-white p-3 rounded-xl transition text-xs font-bold cursor-pointer flex items-center justify-center gap-2 border border-purple-400">
-                    <i class="fa-solid fa-check"></i> Selesai Crop
+                <button onclick="undo()" id="btn-undo" class="bg-gray-800 hover:bg-gray-700 text-gray-200 p-2.5 rounded-xl transition text-xs font-semibold cursor-pointer flex flex-col items-center justify-center gap-1 border border-gray-700 disabled:opacity-30 disabled:cursor-not-allowed" disabled>
+                    <i class="fa-solid fa-arrow-rotate-left text-amber-400 text-base"></i>
+                </button>
+                <button onclick="redo()" id="btn-redo" class="bg-gray-800 hover:bg-gray-700 text-gray-200 p-2.5 rounded-xl transition text-xs font-semibold cursor-pointer flex flex-col items-center justify-center gap-1 border border-gray-700 disabled:opacity-30 disabled:cursor-not-allowed" disabled>
+                    <i class="fa-solid fa-arrow-rotate-right text-emerald-400 text-base"></i>
+                </button>
+                <button onclick="startCropMode()" class="bg-gray-800 hover:bg-gray-700 text-gray-200 p-2.5 rounded-xl transition text-xs font-semibold cursor-pointer flex flex-col items-center justify-center gap-1 border border-gray-700">
+                    <i class="fa-solid fa-crop-simple text-purple-400 text-base"></i>
                 </button>
             </div>
 
-            <div class="bg-gray-950 border border-gray-800 p-4 rounded-2xl mb-4" id="bg-selector-panel">
-                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-2">
-                    <i class="fa-solid fa-palette text-indigo-400 mr-1"></i> Latar Belakang Pas Foto (AI Studio Gradation)
-                </span>
-                <div class="grid grid-cols-4 gap-2 text-xs">
-                    <button onclick="changeSelectedBg('none')" id="btn-bg-none" class="bg-indigo-600 text-white p-2.5 rounded-xl transition font-medium cursor-pointer border border-transparent">
-                        Asli
-                    </button>
-                    <button onclick="changeSelectedBg('white')" id="btn-bg-white" class="bg-gray-800 text-gray-300 hover:bg-gray-700 p-2.5 rounded-xl transition font-medium cursor-pointer border border-transparent">
-                        <span class="inline-block w-3 h-3 bg-white rounded-full mr-1 align-middle border border-gray-400"></span> Studio Putih
-                    </button>
-                    <button onclick="changeSelectedBg('red')" id="btn-bg-red" class="bg-gray-800 text-gray-300 hover:bg-gray-700 p-2.5 rounded-xl transition font-medium cursor-pointer border border-transparent">
-                        <span class="inline-block w-3 h-3 bg-red-600 rounded-full mr-1 align-middle"></span> Studio Merah
-                    </button>
-                    <button onclick="changeSelectedBg('blue')" id="btn-bg-blue" class="bg-gray-800 text-gray-300 hover:bg-gray-700 p-2.5 rounded-xl transition font-medium cursor-pointer border border-transparent">
-                        <span class="inline-block w-3 h-3 bg-blue-600 rounded-full mr-1 align-middle"></span> Studio Biru
-                    </button>
+            <div class="grid grid-cols-2 gap-3 mb-5 hidden" id="crop-active-tools">
+                <button onclick="cancelCrop()" class="bg-gray-800 hover:bg-gray-700 text-red-400 p-3 rounded-xl transition text-sm font-bold cursor-pointer flex items-center justify-center gap-2 border border-red-900/30">
+                    <i class="fa-solid fa-ban"></i> Batal Potong
+                </button>
+                <button onclick="applyWarpCrop()" class="bg-purple-600 hover:bg-purple-500 text-white p-3 rounded-xl transition text-sm font-bold cursor-pointer flex items-center justify-center gap-2 border border-purple-400">
+                    <i class="fa-solid fa-check-double"></i> Selesai Warp
+                </button>
+            </div>
+
+            <div class="w-full flex flex-col gap-3" id="action-download-panel">
+                <div class="flex justify-between items-center bg-gray-900 border border-gray-800 p-3 rounded-xl">
+                    <span class="text-xs font-medium text-gray-400"><i class="fa-solid fa-compress mr-1"></i> Size PDF:</span>
+                    <select id="compress-level" class="bg-gray-800 text-white border border-gray-700 text-xs font-semibold rounded-lg px-2 py-1 outline-none focus:border-indigo-500 transition cursor-pointer">
+                        <option value="hd">HD Asli</option>
+                        <option value="med">Medium (~1 MB)</option>
+                        <option value="low">Rendah (< 500 KB)</option>
+                    </select>
                 </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="action-download-panel">
-                <div class="p-3 bg-gray-950 border border-gray-800 rounded-xl flex items-center gap-3 text-xs text-gray-500">
-                    <i class="fa-solid fa-wand-magic text-indigo-400 text-lg"></i>
-                    <div>
-                        <p class="font-semibold text-gray-300">Auto-Refine Aktif</p>
-                        <p>Simpan dokumen otomatis pas skala cetak kertas A4.</p>
-                    </div>
-                </div>
-                <button id="btn-pdf" onclick="t1_d_p()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-indigo-500/20 cursor-pointer">
+                <button id="btn-pdf" onclick="t1_d_p()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-indigo-500/20 cursor-pointer text-sm tracking-wide">
                     <i class="fa-solid fa-file-pdf text-lg"></i>
-                    Unduh PDF (Size A4)
+                    UNDUH DOKUMEN PDF
                 </button>
             </div>
         </div>
 
     </main>
-
-    <footer class="border-t border-gray-900 bg-black/20 text-center py-4 text-xs text-gray-600">
-        &copy; 2026 AI-Scanner | Internal Processing Only
-    </footer>
-
-    <div id="info-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-gray-900 border border-gray-800 w-full max-w-md rounded-2xl p-6 transform scale-95 transition-transform duration-300">
-            <div class="flex justify-between items-start mb-4">
-                <h3 class="text-xl font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-robot text-indigo-400"></i> Fitur AI Scan Studio
-                </h3>
-                <button onclick="closeModal('info-modal')" class="text-gray-500 hover:text-white transition cursor-pointer">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-            <div class="space-y-3 text-sm text-gray-300">
-                <p>Aplikasi ini memproses gambar Anda langsung di browser secara aman:</p>
-                <ul class="list-disc list-inside space-y-2 text-gray-400 font-light">
-                    <li><strong class="text-gray-200">Anti-Potong Rotasi:</strong> Memutar foto bebas tanpa takut gambar terpotong bingkai.</li>
-                    <li><strong class="text-gray-200">AI Deep Erosi Mask:</strong> Memotong sisa warna background lama di tepi objek dengan presisi ketat.</li>
-                    <li><strong class="text-gray-200">Crop Interaktif:</strong> Klik tombol crop untuk memotong permanen gambar pas foto Anda sebelum diunduh.</li>
-                </ul>
-            </div>
-            <button onclick="closeModal('info-modal')" class="w-full mt-6 bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl text-sm font-semibold transition cursor-pointer">
-                Lanjutkan
-            </button>
-        </div>
-    </div>
 
     <script>
         // === [BAGIAN PROTEKSI - JANGAN DIUBAH] ===
@@ -217,68 +168,60 @@
                 return true;
             } catch (e) { return false; }
         }
-        if(!v_i_c()) { document.body.innerHTML = '<div style="color:white;text-align:center;margin-top:100px;font-family:sans-serif;"><h1>APP_CORRUPTED_ERROR_0xCR</h1><p>Integritas kode rusak. Pembuat asli: '+atob("Q29kZU9uIGJ5X3JpZHdhbg==")+'</p></div>'; throw "StopJS"; }
+        if(!v_i_c()) { document.body.innerHTML = '<div style="color:white;text-align:center;margin-top:100px;font-family:sans-serif;"><h1>APP_CORRUPTED_ERROR_0xCR</h1><p>Integritas kode rusak.</p></div>'; throw "StopJS"; }
         // ===========================================
 
         let img_obj = null;
         let stream_ptr = null; 
         let currentFacingMode = "environment"; 
-        let currentBgColor = "none"; 
-        let segmentationResults = null; 
         
-        // Editor State
+        // State Rotasi & Crop
         let rotationAngle = 0; 
         let isCropModeActive = false;
-        let cropArea = { x: 0, y: 0, w: 0, h: 0 }; 
-        let isDraggingCrop = false;
-        let isResizingCrop = false;
-        let dragStartOffset = { x: 0, y: 0 };
-        const resizeHandleSize = 18;
+        let warpCorners = [{x:0,y:0}, {x:0,y:0}, {x:0,y:0}, {x:0,y:0}];
+        let activeCornerIndex = -1;
+        const cornerHandleRadius = 16; // Lebih besar agar mudah disentuh di HP
 
+        // MANAJEMEN RIWAYAT UNDO / REDO
+        let undoStack = [];
+        let redoStack = [];
+        const maxHistorySize = 15;
+
+        // Viewport Zoom & Pan (Terkunci Tidak Keluar Layar)
+        let zoomScale = 1.0;
+        let defaultFitScale = 1.0; 
+        let panOffset = { x: 0, y: 0 };
+        let isPanningView = false;
+        let panStart = { x: 0, y: 0 };
+        let initialPinchDist = null;
+
+        // Deklarasi Elemen
         const zone_choice = document.getElementById('choice-zone');
         const zone_camera = document.getElementById('camera-zone');
         const zone_preview = document.getElementById('preview-zone');
         const video_feed = document.getElementById('camera-feed');
         const canvas = document.getElementById('output-canvas');
         const ctx = canvas.getContext('2d');
+        const overlayCanvas = document.getElementById('overlay-canvas');
+        const oCtx = overlayCanvas.getContext('2d');
+        const canvas_wrap = document.getElementById('canvas-wrap');
+        const view_window = document.getElementById('view-window');
         const ai_loading = document.getElementById('ai-loading');
 
-        const selfieSegmentation = new SelfieSegmentation({
-            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
-        });
-
-        selfieSegmentation.setOptions({ modelSelection: 1 });
-
-        selfieSegmentation.onResults((results) => {
-            segmentationResults = results;
-            renderFinalOutput();
-            ai_loading.classList.add('hidden');
-        });
-
-        function openModal(id) {
-            const modal = document.getElementById(id);
-            modal.classList.remove('opacity-0', 'pointer-events-none');
-            modal.querySelector('.transform').classList.remove('scale-95');
-        }
-
-        function closeModal(id) {
-            const modal = document.getElementById(id);
-            modal.classList.add('opacity-0', 'pointer-events-none');
-            modal.querySelector('.transform').classList.add('scale-95');
-        }
-
+        // --- SISTEM KAMERA & UPLOAD ---
         function resetApp() {
             stopCamera();
             img_obj = null;
-            segmentationResults = null;
-            currentBgColor = "none";
             rotationAngle = 0;
             isCropModeActive = false;
+            undoStack = [];
+            redoStack = [];
+            updateHistoryButtons();
             document.getElementById('file-input').value = "";
             document.getElementById('normal-editor-tools').classList.remove('hidden');
             document.getElementById('crop-active-tools').classList.add('hidden');
-            document.getElementById('bg-selector-panel').classList.remove('hidden');
             document.getElementById('action-download-panel').classList.remove('hidden');
+            document.getElementById('editor-title-status').innerText = "AI Scanner Preview";
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             zone_choice.classList.remove('hidden');
@@ -290,18 +233,15 @@
             if(!v_i_c() || _0xcr_k !== "Q29kZU9uIGJ5X3JpZHdhbg==") { window.location.reload(); return; }
             zone_choice.classList.add('hidden');
             zone_camera.classList.remove('hidden');
-            if (stream_ptr) { stopCamera(); }
+            if (stream_ptr) stopCamera();
 
-            if (currentFacingMode === "user") {
-                video_feed.classList.add('mirror-view');
-            } else {
-                video_feed.classList.remove('mirror-view');
-            }
+            if (currentFacingMode === "user") video_feed.classList.add('mirror-view');
+            else video_feed.classList.remove('mirror-view');
 
             try {
+                // Request HD stream resolusi tinggi
                 stream_ptr = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: currentFacingMode, width: { ideal: 1280 }, height: { ideal: 720 } }, 
-                    audio: false 
+                    video: { facingMode: currentFacingMode, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false 
                 });
                 video_feed.srcObject = stream_ptr;
             } catch (err) {
@@ -316,34 +256,27 @@
         }
 
         function stopCamera() {
-            if (stream_ptr) {
-                stream_ptr.getTracks().forEach(track => track.stop());
-                stream_ptr = null;
-                video_feed.srcObject = null;
-            }
+            if (stream_ptr) { stream_ptr.getTracks().forEach(track => track.stop()); stream_ptr = null; video_feed.srcObject = null; }
         }
 
         function takePhoto() {
             const temp_canvas = document.createElement('canvas');
-            temp_canvas.width = video_feed.videoWidth;
-            temp_canvas.height = video_feed.videoHeight;
+            temp_canvas.width = video_feed.videoWidth; temp_canvas.height = video_feed.videoHeight;
             const temp_ctx = temp_canvas.getContext('2d');
-            
             temp_ctx.save();
-            if (currentFacingMode === "user") {
-                temp_ctx.translate(temp_canvas.width, 0);
-                temp_ctx.scale(-1, 1);
-            }
+            if (currentFacingMode === "user") { temp_ctx.translate(temp_canvas.width, 0); temp_ctx.scale(-1, 1); }
             temp_ctx.drawImage(video_feed, 0, 0, temp_canvas.width, temp_canvas.height);
             temp_ctx.restore();
 
             img_obj = new Image();
             img_obj.onload = function() {
                 stopCamera();
-                zone_camera.classList.add('hidden');
+                zone_camera.classList.add('hidden'); 
                 zone_preview.classList.remove('hidden');
-                ai_loading.classList.remove('hidden');
-                setTimeout(() => { selfieSegmentation.send({ image: img_obj }); }, 100);
+                
+                renderFinalOutput();
+                calculateAndSetInitialFitScale(); 
+                saveStateToHistory(); // Simpan kondisi mentah awal
             };
             img_obj.src = temp_canvas.toDataURL('image/jpeg', 1.0);
         }
@@ -355,341 +288,375 @@
             reader.onload = function(e) {
                 img_obj = new Image();
                 img_obj.onload = function() {
-                    zone_choice.classList.add('hidden');
+                    zone_choice.classList.add('hidden'); 
                     zone_preview.classList.remove('hidden');
-                    ai_loading.classList.remove('hidden');
-                    setTimeout(() => { selfieSegmentation.send({ image: img_obj }); }, 100);
+                    
+                    renderFinalOutput();
+                    calculateAndSetInitialFitScale(); 
+                    saveStateToHistory(); // Simpan kondisi mentah awal
                 };
                 img_obj.src = e.target.result;
             };
             reader.readAsDataURL(file);
         }
 
-        function changeSelectedBg(colorMode) {
-            currentBgColor = colorMode;
-            const modes = ['none', 'white', 'red', 'blue'];
-            modes.forEach(m => {
-                document.getElementById(`btn-bg-${m}`).className = (m === colorMode) ? 
-                "bg-indigo-600 text-white p-2.5 rounded-xl transition font-medium border border-indigo-400" : 
-                "bg-gray-800 text-gray-300 hover:bg-gray-700 p-2.5 rounded-xl transition font-medium border border-transparent";
-            });
-            renderFinalOutput();
+        // --- SISTEM UNDO REDO YANG AMAN ---
+        function saveStateToHistory() {
+            if (!canvas) return;
+            if (undoStack.length >= maxHistorySize) undoStack.shift();
+            
+            // Kanvas output-canvas SELALU BERSIH karena crop line digambar di overlay-canvas
+            undoStack.push({ imageSrc: canvas.toDataURL('image/jpeg', 1.0), rot: rotationAngle });
+            
+            redoStack = []; 
+            updateHistoryButtons();
+        }
+
+        function undo() {
+            if (undoStack.length <= 1) return; // Menyisakan 1 state orisinil paling bawah
+            if (isCropModeActive) cancelCrop();
+
+            const currentState = undoStack.pop();
+            redoStack.push(currentState);
+            
+            const previousState = undoStack[undoStack.length - 1];
+            loadStateFromHistory(previousState);
+        }
+
+        function redo() {
+            if (redoStack.length === 0) return;
+            if (isCropModeActive) cancelCrop();
+
+            const nextState = redoStack.pop();
+            undoStack.push(nextState);
+            loadStateFromHistory(nextState);
+        }
+
+        function loadStateFromHistory(stateObj) {
+            img_obj = new Image();
+            img_obj.onload = function() {
+                rotationAngle = 0; // Rotasi sudah tercetak di memori piksel
+                renderFinalOutput();
+                calculateAndSetInitialFitScale(); // Kembalikan ke tampilan tengah utuh
+                updateHistoryButtons();
+            };
+            img_obj.src = stateObj.imageSrc;
+        }
+
+        function updateHistoryButtons() {
+            document.getElementById('btn-undo').disabled = (undoStack.length <= 1);
+            document.getElementById('btn-redo').disabled = (redoStack.length === 0);
         }
 
         function rotateImage() {
+            if (isCropModeActive) cancelCrop(); 
             rotationAngle = (rotationAngle + 90) % 360;
             renderFinalOutput();
+            calculateAndSetInitialFitScale(); 
+            saveStateToHistory();
         }
 
+        // --- ZOOM & PAN (FLEXBOX CENTERING & CLAMPING) ---
+        function applyZoomPanStyle() {
+            const winW = view_window.clientWidth; 
+            const winH = view_window.clientHeight;
+            const scaledW = canvas.width * zoomScale; 
+            const scaledH = canvas.height * zoomScale;
+            
+            // Clamping Batas Geser Maksimal (Mencegah bolong hitam di tepi)
+            const maxPanX = Math.max(0, (scaledW - winW) / 2);
+            const maxPanY = Math.max(0, (scaledH - winH) / 2);
+
+            panOffset.x = Math.max(-maxPanX, Math.min(maxPanX, panOffset.x));
+            panOffset.y = Math.max(-maxPanY, Math.min(maxPanY, panOffset.y));
+
+            // Transformasi CSS. Canvas Wrap sudah berada di tengah flexbox secara default.
+            canvas_wrap.style.transform = `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomScale})`;
+        }
+
+        function calculateAndSetInitialFitScale() {
+            const winW = view_window.clientWidth; 
+            const winH = view_window.clientHeight;
+            const scaleW = winW / canvas.width; 
+            const scaleH = winH / canvas.height;
+            
+            // Mengambil skala terkecil dikali 95% agar foto utuh masuk frame dengan sedikit ruang
+            defaultFitScale = Math.min(scaleW, scaleH) * 0.95; 
+            zoomScale = defaultFitScale;
+            panOffset = { x: 0, y: 0 };
+            applyZoomPanStyle();
+        }
+
+        function triggerResetView() {
+            if (isCropModeActive) cancelCrop(); // Matikan mode potong dan buang overlay ungu
+            
+            zoomScale = defaultFitScale; // Kembalikan ke skala paskan gambar, BUKAN zoom gede
+            panOffset = { x: 0, y: 0 };
+            applyZoomPanStyle();
+        }
+
+        view_window.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomFactor = zoomScale * 0.15; 
+            if (e.deltaY < 0) {
+                zoomScale = Math.min(zoomScale + zoomFactor, defaultFitScale * 5.0); 
+            } else {
+                // Tidak boleh diperkecil dari skala fit utuh layar
+                zoomScale = Math.max(zoomScale - zoomFactor, defaultFitScale); 
+            }
+            applyZoomPanStyle();
+        }, { passive: false });
+
+        // --- SISTEM WARP CROP ---
         function startCropMode() {
             isCropModeActive = true;
-            
+            document.getElementById('editor-title-status').innerText = "Warp Mode - Geser 4 Sudut Kertas";
             document.getElementById('normal-editor-tools').classList.add('hidden');
-            document.getElementById('bg-selector-panel').classList.add('hidden');
             document.getElementById('action-download-panel').classList.add('hidden');
             document.getElementById('crop-active-tools').classList.remove('hidden');
 
-            cropArea.x = canvas.width * 0.2;
-            cropArea.y = canvas.height * 0.15;
-            cropArea.w = canvas.width * 0.6;
-            cropArea.h = cropArea.w * 1.414; 
-
-            if (cropArea.y + cropArea.h > canvas.height) {
-                cropArea.h = canvas.height - cropArea.y - 15;
-                cropArea.w = cropArea.h / 1.414;
-            }
-            renderFinalOutput();
+            const w = canvas.width; const h = canvas.height;
+            warpCorners[0] = { x: w * 0.1, y: h * 0.1 }; 
+            warpCorners[1] = { x: w * 0.9, y: h * 0.1 }; 
+            warpCorners[2] = { x: w * 0.9, y: h * 0.9 }; 
+            warpCorners[3] = { x: w * 0.1, y: h * 0.9 }; 
+            drawUIOverlay(); // Gambar garis di lapisan overlay transparan
         }
 
         function cancelCrop() {
             isCropModeActive = false;
+            document.getElementById('editor-title-status').innerText = "AI Scanner Preview";
             document.getElementById('normal-editor-tools').classList.remove('hidden');
-            document.getElementById('bg-selector-panel').classList.remove('hidden');
             document.getElementById('action-download-panel').classList.remove('hidden');
             document.getElementById('crop-active-tools').classList.add('hidden');
-            renderFinalOutput();
+            drawUIOverlay(); // Bersihkan garis di overlay transparan
         }
 
-        function applyCrop() {
+        function applyWarpCrop() {
             isCropModeActive = false;
-            
-            const cutCanvas = document.createElement('canvas');
-            cutCanvas.width = cropArea.w;
-            cutCanvas.height = cropArea.h;
-            const cutCtx = cutCanvas.getContext('2d');
-            
-            cutCtx.drawImage(canvas, cropArea.x, cropArea.y, cropArea.w, cropArea.h, 0, 0, cropArea.w, cropArea.h);
-            
-            img_obj = new Image();
-            img_obj.onload = function() {
-                rotationAngle = 0;
-                segmentationResults = null; 
-                currentBgColor = "none";
-                
-                document.getElementById('normal-editor-tools').className = "grid grid-cols-2 gap-3 mb-4";
-                document.getElementById('bg-selector-panel').classList.remove('hidden');
-                document.getElementById('action-download-panel').classList.remove('hidden');
-                document.getElementById('crop-active-tools').classList.add('hidden');
-                
-                ai_loading.classList.remove('hidden');
-                setTimeout(() => { selfieSegmentation.send({ image: img_obj }); }, 100);
-            };
-            img_obj.src = cutCanvas.toDataURL('image/jpeg', 1.0);
+            ai_loading.classList.remove('hidden');
+
+            setTimeout(() => {
+                // Resolusi render hasil warp ditetapkan di 1200px lebar HD
+                const outW = 1200; const outH = Math.round(outW * 1.4142); 
+                const warpCanvas = document.createElement('canvas');
+                warpCanvas.width = outW; warpCanvas.height = outH;
+                const wCtx = warpCanvas.getContext('2d');
+
+                const srcPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const dstData = wCtx.createImageData(outW, outH);
+                const p0 = warpCorners[0], p1 = warpCorners[1], p2 = warpCorners[2], p3 = warpCorners[3];
+
+                for (let y = 0; y < outH; y++) {
+                    let v = y / outH;
+                    for (let x = 0; x < outW; x++) {
+                        let u = x / outW;
+                        let srcX = Math.round((1-u)*(1-v)*p0.x + u*(1-v)*p1.x + u*v*p2.x + (1-u)*v*p3.x);
+                        let srcY = Math.round((1-u)*(1-v)*p0.y + u*(1-v)*p1.y + u*v*p2.y + (1-u)*v*p3.y);
+
+                        srcX = Math.max(0, Math.min(srcX, canvas.width - 1));
+                        srcY = Math.max(0, Math.min(srcY, canvas.height - 1));
+                        let srcIdx = (srcY * canvas.width + srcX) * 4;
+                        let dstIdx = (y * outW + x) * 4;
+
+                        dstData.data[dstIdx]   = srcPixels.data[srcIdx];
+                        dstData.data[dstIdx+1] = srcPixels.data[srcIdx+1];
+                        dstData.data[dstIdx+2] = srcPixels.data[srcIdx+2];
+                        dstData.data[dstIdx+3] = srcPixels.data[srcIdx+3];
+                    }
+                }
+                wCtx.putImageData(dstData, 0, 0);
+
+                img_obj = new Image();
+                img_obj.onload = function() {
+                    rotationAngle = 0;
+                    document.getElementById('normal-editor-tools').classList.remove('hidden');
+                    document.getElementById('action-download-panel').classList.remove('hidden');
+                    document.getElementById('crop-active-tools').classList.add('hidden');
+                    document.getElementById('editor-title-status').innerText = "AI Scanner Preview";
+                    
+                    renderFinalOutput();
+                    calculateAndSetInitialFitScale(); 
+                    saveStateToHistory(); // Rekam hasil potongan ke riwayat Undo/Redo
+                    ai_loading.classList.add('hidden');
+                };
+                img_obj.src = warpCanvas.toDataURL('image/jpeg', 1.0);
+            }, 60);
         }
 
-        // --- CORE AI FILTER & RENDER ENGINE (ANTI-TERPOTONG & RESPONSIF SKALA) ---
+        // --- CORE ENGINE RENDERING MURNI ---
         function renderFinalOutput() {
-            if(typeof v_i_c !== 'function' || !v_i_c()) { canvas.width = 100; canvas.height = 100; return; }
+            if(typeof v_i_c !== 'function' || !v_i_c()) { canvas.width = 100; return; }
 
-            // 1. Tentukan orientasi dimensi secara adaptif berdasarkan sudut rotasi saat ini
             const isRotatedOrtho = (rotationAngle === 90 || rotationAngle === 270);
             let displayW = isRotatedOrtho ? img_obj.height : img_obj.width;
             let displayH = isRotatedOrtho ? img_obj.width : img_obj.height;
 
-            // 2. Set pembatas resolusi render layar pengerjaan agar responsif di HP
-            const max_h = 1200; 
-            if (displayH > max_h) {
-                const sc = max_h / displayH;
-                displayH = max_h;
-                displayW = displayW * sc;
-            }
+            const max_h = 2000; 
+            if (displayH > max_h) { const sc = max_h / displayH; displayH = max_h; displayW = displayW * sc; }
 
-            // Canvas utama diubah ukurannya secara adaptif mengikuti objek (TIDAK AKAN TERPOTONG)
-            canvas.width = displayW;
-            canvas.height = displayH;
+            // Sesuaikan ukuran kedua kanvas (Output Gambar & Overlay Interaktif)
+            canvas.width = displayW; canvas.height = displayH;
+            overlayCanvas.width = displayW; overlayCanvas.height = displayH;
 
-            ctx.fillStyle = "#FFFFFF";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Gambar data murni pada kanvas Output (Bersih tanpa coretan UI)
+            ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.translate(displayW / 2, displayH / 2);
+            ctx.rotate((rotationAngle * Math.PI) / 180);
+            if (isRotatedOrtho) ctx.drawImage(img_obj, -displayH / 2, -displayW / 2, displayH, displayW);
+            else ctx.drawImage(img_obj, -displayW / 2, -displayH / 2, displayW, displayH);
+            ctx.restore();
 
-            // 3. Buat canvas internal khusus pengerjaan transformasi rotasi
-            const rotCanvas = document.createElement('canvas');
-            rotCanvas.width = displayW;
-            rotCanvas.height = displayH;
-            const rotCtx = rotCanvas.getContext('2d');
-
-            rotCtx.translate(displayW / 2, displayH / 2);
-            rotCtx.rotate((rotationAngle * Math.PI) / 180);
-
-            // Penempatan matriks terbalik yang presisi agar gambar utuh 100%
-            if (isRotatedOrtho) {
-                rotCtx.drawImage(img_obj, -displayH / 2, -displayW / 2, displayH, displayW);
-            } else {
-                rotCtx.drawImage(img_obj, -displayW / 2, -displayH / 2, displayW, displayH);
-            }
-
-            if (currentBgColor === "none" || !segmentationResults) {
-                ctx.drawImage(rotCanvas, 0, 0);
-                applyBrightenAndContrast(0, 0, canvas.width, canvas.height);
-                drawCropOverlay();
-                return;
-            }
-
-            // ========================================================
-            // PROSES BACKING STUDIO TAJAM (HIGH SATURATION ACCENT)
-            // ========================================================
-            const bgCanvas = document.createElement('canvas');
-            bgCanvas.width = displayW;
-            bgCanvas.height = displayH;
-            const bgCtx = bgCanvas.getContext('2d');
-
-            const centerX = displayW / 2;
-            const centerY = displayH * 0.38; 
-            const radiusInner = 15;
-            const radiusOuter = Math.max(displayW, displayH) * 0.60;
-            let studioGrad = bgCtx.createRadialGradient(centerX, centerY, radiusInner, centerX, centerY, radiusOuter);
-
-            if (currentBgColor === "red") {
-                studioGrad.addColorStop(0, '#FF0505');   
-                studioGrad.addColorStop(0.3, '#D50000'); 
-                studioGrad.addColorStop(0.8, '#550000'); 
-                studioGrad.addColorStop(1, '#000000');    
-                bgCtx.fillStyle = studioGrad;
-            } else if (currentBgColor === "blue") {
-                studioGrad.addColorStop(0, '#1A73E8');   
-                studioGrad.addColorStop(0.28, '#0022DD'); 
-                studioGrad.addColorStop(0.8, '#030E26'); 
-                studioGrad.addColorStop(1, '#000000');    
-                bgCtx.fillStyle = studioGrad;
-            } else if (currentBgColor === "white") {
-                studioGrad.addColorStop(0, '#FFFFFF');
-                studioGrad.addColorStop(0.7, '#F2F2F6');
-                studioGrad.addColorStop(1, '#CCCCCC');
-                bgCtx.fillStyle = studioGrad;
-            }
-            bgCtx.fillRect(0, 0, displayW, displayH);
-
-            // Membuat mask rotasi
-            const maskRotCanvas = document.createElement('canvas');
-            maskRotCanvas.width = displayW;
-            maskRotCanvas.height = displayH;
-            const maskRotCtx = maskRotCanvas.getContext('2d');
-            maskRotCtx.translate(displayW / 2, displayH / 2);
-            maskRotCtx.rotate((rotationAngle * Math.PI) / 180);
-
-            if (isRotatedOrtho) {
-                maskRotCtx.drawImage(segmentationResults.segmentationMask, -displayH / 2, -displayW / 2, displayH, displayW);
-            } else {
-                maskRotCtx.drawImage(segmentationResults.segmentationMask, -displayW / 2, -displayH / 2, displayW, displayH);
-            }
-
-            // ALGORITMA DEEP EROSI MASKER: Thresholding ditingkatkan (175) untuk mengikis kotoran luar
-            const maskData = maskRotCtx.getImageData(0, 0, displayW, displayH);
-            const maskPix = maskData.data;
-            for (let i = 0; i < maskPix.length; i += 4) {
-                let val = maskPix[i];
-                if (val > 175) { 
-                    maskPix[i] = 255;
-                    maskPix[i+3] = 255;
-                } else {
-                    maskPix[i] = 0;
-                    maskPix[i+3] = 0;
-                }
-            }
-            maskRotCtx.putImageData(maskData, 0, 0);
-
-            // Gabungkan objek manusia dengan background studio baru
-            const fgCanvas = document.createElement('canvas');
-            fgCanvas.width = displayW;
-            fgCanvas.height = displayH;
-            const fgCtx = fgCanvas.getContext('2d');
-
-            fgCtx.drawImage(rotCanvas, 0, 0, displayW, displayH);
-            fgCtx.globalCompositeOperation = 'destination-in';
-            fgCtx.filter = 'blur(1px)'; 
-            fgCtx.drawImage(maskRotCanvas, 0, 0, displayW, displayH);
-            fgCtx.filter = 'none';
-
-            bgCtx.drawImage(fgCanvas, 0, 0, displayW, displayH);
-            ctx.drawImage(bgCanvas, 0, 0);
-
-            applyBrightenAndContrast(0, 0, canvas.width, canvas.height);
-            drawCropOverlay();
+            drawUIOverlay(); // Panggil fungsi gambar UI untuk dieksekusi di kanvas transparan atasnya
         }
 
-        function applyBrightenAndContrast(x, y, w, h) {
-            try {
-                const img_d = ctx.getImageData(x, y, w, h);
-                const pix = img_d.data;
-                let total_l = 0; let count = 0;
-                for (let i = 0; i < pix.length; i += 16) { 
-                    total_l += (0.299 * pix[i] + 0.587 * pix[i+1] + 0.114 * pix[i+2]); count++;
-                }
-                const avg_l = total_l / count;
-                let b_adj = 4; let c_adj = 1.18; 
-
-                if (avg_l < 120) { b_adj = (120 - avg_l) * 0.38; c_adj = 1.25; }
-                const fact = (259 * (c_adj + 255)) / (255 * (259 - c_adj));
-                for (let i = 0; i < pix.length; i += 4) {
-                    pix[i]   = fact * (pix[i] + b_adj - 128) + 128; 
-                    pix[i+1] = fact * (pix[i+1] + b_adj - 128) + 128; 
-                    pix[i+2] = fact * (pix[i+2] + b_adj - 128) + 128; 
-                }
-                ctx.putImageData(img_d, x, y);
-            } catch (e) {}
-        }
-
-        function drawCropOverlay() {
+        function drawUIOverlay() {
+            oCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            
             if (!isCropModeActive) return;
-            ctx.fillStyle = "rgba(0, 0, 0, 0.72)";
-            ctx.fillRect(0, 0, canvas.width, cropArea.y);
-            ctx.fillRect(0, cropArea.y + cropArea.h, canvas.width, canvas.height - (cropArea.y + cropArea.h));
-            ctx.fillRect(0, cropArea.y, cropArea.x, cropArea.h);
-            ctx.fillRect(cropArea.x + cropArea.w, cropArea.y, canvas.width - (cropArea.x + cropArea.w), cropArea.h);
 
-            ctx.strokeStyle = "#C084FC"; 
-            ctx.lineWidth = 3;
-            ctx.strokeRect(cropArea.x, cropArea.y, cropArea.w, cropArea.h);
+            oCtx.strokeStyle = "#A855F7"; oCtx.lineWidth = 6;
+            oCtx.beginPath();
+            oCtx.moveTo(warpCorners[0].x, warpCorners[0].y); oCtx.lineTo(warpCorners[1].x, warpCorners[1].y);
+            oCtx.lineTo(warpCorners[2].x, warpCorners[2].y); oCtx.lineTo(warpCorners[3].x, warpCorners[3].y);
+            oCtx.closePath(); oCtx.stroke();
 
-            ctx.fillStyle = "#A855F7";
-            ctx.fillRect(cropArea.x + cropArea.w - (resizeHandleSize/2), cropArea.y + cropArea.h - (resizeHandleSize/2), resizeHandleSize, resizeHandleSize);
+            // Peneduh area luar potongan crop
+            oCtx.fillStyle = "rgba(0,0,0,0.65)";
+            oCtx.beginPath();
+            oCtx.moveTo(0,0); oCtx.lineTo(overlayCanvas.width,0); oCtx.lineTo(overlayCanvas.width,overlayCanvas.height); oCtx.lineTo(0,overlayCanvas.height);
+            oCtx.moveTo(warpCorners[0].x, warpCorners[0].y); oCtx.lineTo(warpCorners[3].x, warpCorners[3].y);
+            oCtx.lineTo(warpCorners[2].x, warpCorners[2].y); oCtx.lineTo(warpCorners[1].x, warpCorners[1].y);
+            oCtx.closePath(); oCtx.fill("evenodd");
+
+            warpCorners.forEach((corner, idx) => {
+                oCtx.fillStyle = idx === activeCornerIndex ? "#EC4899" : "#A855F7"; 
+                oCtx.beginPath(); oCtx.arc(corner.x, corner.y, cornerHandleRadius, 0, 2 * Math.PI); oCtx.fill();
+                oCtx.strokeStyle = "#FFFFFF"; oCtx.lineWidth = 3; oCtx.stroke();
+            });
         }
 
+        // --- SISTEM INPUT GESTUR PEMETAAN KOORDINAT YANG TEPAT ---
         function getCanvasMousePos(e) {
+            // Karena canvas-wrap di-scale via CSS, kita gunakan rect dari output-canvas
             const rect = canvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return { x: ((clientX - rect.left) / rect.width) * canvas.width, y: ((clientY - rect.top) / rect.height) * canvas.height };
+            
+            return {
+                x: ((clientX - rect.left) / rect.width) * canvas.width,
+                y: ((clientY - rect.top) / rect.height) * canvas.height,
+                rawX: clientX, rawY: clientY
+            };
         }
 
-        function handleMouseDown(e) {
-            if (!isCropModeActive) return;
+        view_window.addEventListener('mousedown', (e) => {
             const pos = getCanvasMousePos(e);
-            const handleX = cropArea.x + cropArea.w;
-            const handleY = cropArea.y + cropArea.h;
-            
-            if (Math.abs(pos.x - handleX) < resizeHandleSize * 1.5 && Math.abs(pos.y - handleY) < resizeHandleSize * 1.5) {
-                isResizingCrop = true;
-                e.preventDefault();
+            if (isCropModeActive) {
+                activeCornerIndex = -1;
+                warpCorners.forEach((c, idx) => { if (Math.hypot(pos.x - c.x, pos.y - c.y) < cornerHandleRadius * 4) activeCornerIndex = idx; });
+                if (activeCornerIndex !== -1) return;
+            }
+            isPanningView = true;
+            panStart.x = pos.rawX - panOffset.x; panStart.y = pos.rawY - panOffset.y;
+        });
+
+        view_window.addEventListener('mousemove', (e) => {
+            const pos = getCanvasMousePos(e);
+            if (isCropModeActive && activeCornerIndex !== -1) {
+                warpCorners[activeCornerIndex].x = Math.max(0, Math.min(pos.x, canvas.width));
+                warpCorners[activeCornerIndex].y = Math.max(0, Math.min(pos.y, canvas.height));
+                drawUIOverlay(); // Cukup perbarui overlay, tak perlu render ulang foto berat
                 return;
             }
-            if (pos.x > cropArea.x && pos.x < cropArea.x + cropArea.w && pos.y > cropArea.y && pos.y < cropArea.y + cropArea.h) {
-                isDraggingCrop = true;
-                dragStartOffset.x = pos.x - cropArea.x;
-                dragStartOffset.y = pos.y - cropArea.y;
-                e.preventDefault();
+            if (isPanningView) {
+                const cx = e.touches ? e.touches[0].clientX : e.clientX;
+                const cy = e.touches ? e.touches[0].clientY : e.clientY;
+                panOffset.x = cx - panStart.x; panOffset.y = cy - panStart.y;
+                applyZoomPanStyle(); // Clamp bekerja di dalam sini untuk mencegah keluar batas
             }
-        }
+        });
 
-        function handleMouseMove(e) {
-            if (!isCropModeActive) return;
-            const pos = getCanvasMousePos(e);
+        window.addEventListener('mouseup', () => { isPanningView = false; activeCornerIndex = -1; });
 
-            if (isResizingCrop) {
-                let newW = pos.x - cropArea.x;
-                if (newW < 80) newW = 80;
-                let newH = newW * 1.414;
-                if (cropArea.x + newW <= canvas.width && cropArea.y + newH <= canvas.height) {
-                    cropArea.w = newW; cropArea.h = newH;
+        view_window.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                initialPinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+            } else {
+                const pos = getCanvasMousePos(e);
+                if (isCropModeActive) {
+                    activeCornerIndex = -1;
+                    warpCorners.forEach((c, idx) => { if (Math.hypot(pos.x - c.x, pos.y - c.y) < cornerHandleRadius * 5) activeCornerIndex = idx; });
+                    if (activeCornerIndex !== -1) { e.preventDefault(); return; }
                 }
-                renderFinalOutput();
-                e.preventDefault();
-            } else if (isDraggingCrop) {
-                let newX = pos.x - dragStartOffset.x;
-                let newY = pos.y - dragStartOffset.y;
-                if (newX < 0) newX = 0; if (newY < 0) newY = 0;
-                if (newX + cropArea.w > canvas.width) newX = canvas.width - cropArea.w;
-                if (newY + cropArea.h > canvas.height) newY = canvas.height - cropArea.h;
-                cropArea.x = newX; cropArea.y = newY;
-                renderFinalOutput();
-                e.preventDefault();
+                isPanningView = true;
+                panStart.x = pos.rawX - panOffset.x; panStart.y = pos.rawY - panOffset.y;
             }
-        }
+        }, { passive: false });
 
-        canvas.addEventListener('mousedown', handleMouseDown);
-        canvas.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('mouseup', () => { isDraggingCrop = false; isResizingCrop = false; });
-        canvas.addEventListener('touchstart', handleMouseDown, { passive: false });
-        canvas.addEventListener('touchmove', handleMouseMove, { passive: false });
-        window.addEventListener('touchend', () => { isDraggingCrop = false; isResizingCrop = false; });
+        view_window.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 2 && initialPinchDist) {
+                e.preventDefault();
+                const currentDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                const scaleDiff = currentDist / initialPinchDist;
+                const zoomChange = (scaleDiff - 1) * zoomScale * 0.8;
+                zoomScale = Math.max(defaultFitScale, Math.min(zoomScale + zoomChange, defaultFitScale * 5.0)); 
+                initialPinchDist = currentDist;
+                applyZoomPanStyle(); 
+            } else if (e.touches.length === 1) {
+                const pos = getCanvasMousePos(e);
+                if (isCropModeActive && activeCornerIndex !== -1) {
+                    e.preventDefault();
+                    warpCorners[activeCornerIndex].x = Math.max(0, Math.min(pos.x, canvas.width));
+                    warpCorners[activeCornerIndex].y = Math.max(0, Math.min(pos.y, canvas.height));
+                    drawUIOverlay(); // Cukup perbarui overlay
+                    return;
+                }
+                if (isPanningView) {
+                    panOffset.x = pos.rawX - panStart.x; panOffset.y = pos.rawY - panStart.y;
+                    applyZoomPanStyle(); 
+                }
+            }
+        }, { passive: false });
 
-        // --- GENERATE PDF ---
+        view_window.addEventListener('touchend', () => { isPanningView = false; activeCornerIndex = -1; initialPinchDist = null; });
+
+        // --- GENERATE PDF KUALITAS TINGGI BEBAS GARIS CROP ---
         function t1_d_p() {
-            try {
-                if(!v_i_c() || typeof v_i_c !== 'function') { alert("System compromised."); return; }
-            } catch(e) { return; }
+            try { if(!v_i_c() || typeof v_i_c !== 'function') return; } catch(e) { return; }
 
-            const i_d = canvas.toDataURL('image/jpeg', 0.95);
+            // Jika secara tidak sengaja menekan download saat mode crop hidup, matikan mode dan bersihkan overlay
+            if (isCropModeActive) cancelCrop();
+
+            const compressMode = document.getElementById('compress-level').value;
+            let exportQuality = 0.98; 
+            let exportScaleFactor = 1.0; 
+
+            if (compressMode === 'med') { exportQuality = 0.80; exportScaleFactor = 0.65; }
+            else if (compressMode === 'low') { exportQuality = 0.60; exportScaleFactor = 0.40; }
+
+            // Kanvas Murni Output sudah dijamin BERSIH karena UI berada di Overlay Canvas.
+            let targetExportCanvas = canvas;
+            if (exportScaleFactor < 1.0) {
+                targetExportCanvas = document.createElement('canvas');
+                targetExportCanvas.width = canvas.width * exportScaleFactor;
+                targetExportCanvas.height = canvas.height * exportScaleFactor;
+                const txCtx = targetExportCanvas.getContext('2d');
+                txCtx.drawImage(canvas, 0, 0, targetExportCanvas.width, targetExportCanvas.height);
+            }
+
+            const i_d = targetExportCanvas.toDataURL('image/jpeg', exportQuality);
             const { jsPDF } = window.jspdf;
-            
             const pdf = new jsPDF('p', 'mm', 'a4');
-            const p_w = pdf.internal.pageSize.getWidth();
-            const p_h = pdf.internal.pageSize.getHeight();
-
-            const m = 4; 
-            const d_w = p_w - (m * 2);
-            const d_h = p_w * (canvas.height / canvas.width) - (m * 2);
+            const p_w = pdf.internal.pageSize.getWidth(); const p_h = pdf.internal.pageSize.getHeight();
+            const m = 4; const d_w = p_w - (m * 2); const d_h = p_w * (canvas.height / canvas.width) - (m * 2);
 
             let renderH = d_h; let renderW = d_w;
-            if (renderH > p_h - (m * 2)) {
-                renderH = p_h - (m * 2);
-                renderW = renderH * (canvas.width / canvas.height);
-            }
+            if (renderH > p_h - (m * 2)) { renderH = p_h - (m * 2); renderW = renderH * (canvas.width / canvas.height); }
 
-            const xCentering = (p_w - renderW) / 2;
-            const yCentering = (p_h - renderH) / 2;
-
-            pdf.addImage(i_d, 'JPEG', xCentering, yCentering, renderW, renderH);
-            pdf.save('CO-Studio-Pro_'+Date.now()+'.pdf');
+            pdf.addImage(i_d, 'JPEG', (p_w - renderW) / 2, (p_h - renderH) / 2, renderW, renderH);
+            pdf.save('CO-Document-Scanned_'+Date.now()+'.pdf');
         }
     </script>
 </body>
