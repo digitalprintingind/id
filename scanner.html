@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scanner AI Web Pro</title>
+    <title>Scanner Web Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -19,6 +19,31 @@
         
         #camera-feed { object-fit: cover; }
         .mirror-view { transform: scaleX(-1); }
+        
+        /* Wadah preview menggunakan Flexbox untuk Centering Sempurna */
+        .preview-window {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            height: 480px;
+            background: #06060c; 
+            border-radius: 1rem;
+            border: 1px solid #1f2937;
+        }
+        
+        /* Kontainer Kanvas Relatif */
+        .canvas-container {
+            position: relative;
+            transform-origin: center center;
+            user-select: none;
+            touch-action: none;
+            cursor: grab;
+            transition: transform 0.05s ease-out; /* Animasi halus saat dilepas */
+        }
+        .canvas-container:active { cursor: grabbing; transition: none; }
     </style>
 </head>
 <body class="text-gray-100 min-h-screen flex flex-col justify-between">
@@ -86,7 +111,7 @@
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                     </span>
-                    <span class="text-sm font-semibold text-emerald-400 uppercase tracking-wider" id="editor-title-status">AI Scanner Preview</span>
+                    <span class="text-sm font-semibold text-emerald-400 uppercase tracking-wider" id="editor-title-status">Scanner Preview</span>
                 </div>
                 <div class="flex gap-3 items-center">
                     <span class="text-xs text-gray-500 hidden sm:inline"><i class="fa-solid fa-magnifying-glass text-gray-600"></i> Usap 2 jari / Scroll zoom</span>
@@ -96,10 +121,10 @@
                 </div>
             </div>
 
-            <div class="relative overflow-hidden w-full h-[480px] bg-gray-950 rounded-xl border border-gray-700 mb-4 flex items-center justify-center" id="view-window">
+            <div class="preview-window mb-4" id="view-window">
                 
-                <div id="canvas-wrap" style="position: relative; transform-origin: center center;">
-                    <canvas id="output-canvas" class="block shadow-2xl"></canvas>
+                <div class="canvas-container" id="canvas-wrap">
+                    <canvas id="output-canvas" class="block shadow-[0_10px_30px_rgba(0,0,0,0.8)]"></canvas>
                     <canvas id="overlay-canvas" class="absolute top-0 left-0 w-full h-full pointer-events-none"></canvas>
                 </div>
 
@@ -109,7 +134,7 @@
                 </div>
 
                 <button onclick="triggerResetView()" class="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md border border-gray-700 hover:bg-gray-800 px-3 py-2 rounded-xl text-xs font-semibold transition z-10 text-indigo-400 cursor-pointer shadow-lg">
-                    <i class="fa-solid fa-expand mr-1"></i> Reset View
+                    <i class="fa-solid fa-expand mr-1"></i> Full View
                 </button>
             </div>
 
@@ -130,10 +155,10 @@
 
             <div class="grid grid-cols-2 gap-3 mb-5 hidden" id="crop-active-tools">
                 <button onclick="cancelCrop()" class="bg-gray-800 hover:bg-gray-700 text-red-400 p-3 rounded-xl transition text-sm font-bold cursor-pointer flex items-center justify-center gap-2 border border-red-900/30">
-                    <i class="fa-solid fa-ban"></i> Batal Potong
+                    <i class="fa-solid fa-ban"></i> Batal
                 </button>
                 <button onclick="applyWarpCrop()" class="bg-purple-600 hover:bg-purple-500 text-white p-3 rounded-xl transition text-sm font-bold cursor-pointer flex items-center justify-center gap-2 border border-purple-400">
-                    <i class="fa-solid fa-check-double"></i> Selesai Warp
+                    <i class="fa-solid fa-check-double"></i> Selesai
                 </button>
             </div>
 
@@ -141,7 +166,7 @@
                 <div class="flex justify-between items-center bg-gray-900 border border-gray-800 p-3 rounded-xl">
                     <span class="text-xs font-medium text-gray-400"><i class="fa-solid fa-compress mr-1"></i> Size PDF:</span>
                     <select id="compress-level" class="bg-gray-800 text-white border border-gray-700 text-xs font-semibold rounded-lg px-2 py-1 outline-none focus:border-indigo-500 transition cursor-pointer">
-                        <option value="hd">HD Asli</option>
+                        <option value="hd">Asli</option>
                         <option value="med">Medium (~1 MB)</option>
                         <option value="low">Rendah (< 500 KB)</option>
                     </select>
@@ -180,14 +205,14 @@
         let isCropModeActive = false;
         let warpCorners = [{x:0,y:0}, {x:0,y:0}, {x:0,y:0}, {x:0,y:0}];
         let activeCornerIndex = -1;
-        const cornerHandleRadius = 16; // Lebih besar agar mudah disentuh di HP
+        const cornerHandleRadius = 16; 
 
         // MANAJEMEN RIWAYAT UNDO / REDO
         let undoStack = [];
         let redoStack = [];
         const maxHistorySize = 15;
 
-        // Viewport Zoom & Pan (Terkunci Tidak Keluar Layar)
+        // Viewport Zoom & Pan
         let zoomScale = 1.0;
         let defaultFitScale = 1.0; 
         let panOffset = { x: 0, y: 0 };
@@ -220,9 +245,10 @@
             document.getElementById('file-input').value = "";
             document.getElementById('normal-editor-tools').classList.remove('hidden');
             document.getElementById('crop-active-tools').classList.add('hidden');
-            document.getElementById('action-download-panel').classList.remove('hidden');
             document.getElementById('editor-title-status').innerText = "AI Scanner Preview";
+            
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            oCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
             
             zone_choice.classList.remove('hidden');
             zone_camera.classList.add('hidden');
@@ -239,7 +265,6 @@
             else video_feed.classList.remove('mirror-view');
 
             try {
-                // Request HD stream resolusi tinggi
                 stream_ptr = await navigator.mediaDevices.getUserMedia({ 
                     video: { facingMode: currentFacingMode, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false 
                 });
@@ -276,7 +301,7 @@
                 
                 renderFinalOutput();
                 calculateAndSetInitialFitScale(); 
-                saveStateToHistory(); // Simpan kondisi mentah awal
+                saveStateToHistory(); 
             };
             img_obj.src = temp_canvas.toDataURL('image/jpeg', 1.0);
         }
@@ -293,7 +318,7 @@
                     
                     renderFinalOutput();
                     calculateAndSetInitialFitScale(); 
-                    saveStateToHistory(); // Simpan kondisi mentah awal
+                    saveStateToHistory(); 
                 };
                 img_obj.src = e.target.result;
             };
@@ -305,8 +330,8 @@
             if (!canvas) return;
             if (undoStack.length >= maxHistorySize) undoStack.shift();
             
-            // Kanvas output-canvas SELALU BERSIH karena crop line digambar di overlay-canvas
-            undoStack.push({ imageSrc: canvas.toDataURL('image/jpeg', 1.0), rot: rotationAngle });
+            // output-canvas terjamin BERSIH tanpa garis ungu (karena garis ungu ada di overlayCanvas)
+            undoStack.push({ imageSrc: canvas.toDataURL('image/jpeg', 1.0) });
             
             redoStack = []; 
             updateHistoryButtons();
@@ -333,12 +358,14 @@
         }
 
         function loadStateFromHistory(stateObj) {
+            ai_loading.classList.remove('hidden');
             img_obj = new Image();
             img_obj.onload = function() {
-                rotationAngle = 0; // Rotasi sudah tercetak di memori piksel
+                rotationAngle = 0; // Rotasi sdh matang pada layer gambar history
                 renderFinalOutput();
-                calculateAndSetInitialFitScale(); // Kembalikan ke tampilan tengah utuh
+                calculateAndSetInitialFitScale(); 
                 updateHistoryButtons();
+                ai_loading.classList.add('hidden');
             };
             img_obj.src = stateObj.imageSrc;
         }
@@ -363,14 +390,14 @@
             const scaledW = canvas.width * zoomScale; 
             const scaledH = canvas.height * zoomScale;
             
-            // Clamping Batas Geser Maksimal (Mencegah bolong hitam di tepi)
+            // Clamping Batas Geser Maksimal (Mencegah bolong hitam di luar objek)
             const maxPanX = Math.max(0, (scaledW - winW) / 2);
             const maxPanY = Math.max(0, (scaledH - winH) / 2);
 
             panOffset.x = Math.max(-maxPanX, Math.min(maxPanX, panOffset.x));
             panOffset.y = Math.max(-maxPanY, Math.min(maxPanY, panOffset.y));
 
-            // Transformasi CSS. Canvas Wrap sudah berada di tengah flexbox secara default.
+            // Flexbox Center + Offset Translate
             canvas_wrap.style.transform = `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomScale})`;
         }
 
@@ -380,7 +407,7 @@
             const scaleW = winW / canvas.width; 
             const scaleH = winH / canvas.height;
             
-            // Mengambil skala terkecil dikali 95% agar foto utuh masuk frame dengan sedikit ruang
+            // 0.95 agar ada margin 5% dari tepi kotak preview, tidak kepotong/kelewat zoom
             defaultFitScale = Math.min(scaleW, scaleH) * 0.95; 
             zoomScale = defaultFitScale;
             panOffset = { x: 0, y: 0 };
@@ -388,9 +415,9 @@
         }
 
         function triggerResetView() {
-            if (isCropModeActive) cancelCrop(); // Matikan mode potong dan buang overlay ungu
+            if (isCropModeActive) cancelCrop(); // Otomatis tutup mode crop
             
-            zoomScale = defaultFitScale; // Kembalikan ke skala paskan gambar, BUKAN zoom gede
+            zoomScale = defaultFitScale; 
             panOffset = { x: 0, y: 0 };
             applyZoomPanStyle();
         }
@@ -401,18 +428,16 @@
             if (e.deltaY < 0) {
                 zoomScale = Math.min(zoomScale + zoomFactor, defaultFitScale * 5.0); 
             } else {
-                // Tidak boleh diperkecil dari skala fit utuh layar
-                zoomScale = Math.max(zoomScale - zoomFactor, defaultFitScale); 
+                zoomScale = Math.max(zoomScale - zoomFactor, defaultFitScale); // Tidak boleh lebih kecil dari fit layar
             }
             applyZoomPanStyle();
         }, { passive: false });
 
-        // --- SISTEM WARP CROP ---
+        // --- SISTEM WARP CROP BEBAS ---
         function startCropMode() {
             isCropModeActive = true;
             document.getElementById('editor-title-status').innerText = "Warp Mode - Geser 4 Sudut Kertas";
             document.getElementById('normal-editor-tools').classList.add('hidden');
-            document.getElementById('action-download-panel').classList.add('hidden');
             document.getElementById('crop-active-tools').classList.remove('hidden');
 
             const w = canvas.width; const h = canvas.height;
@@ -420,16 +445,17 @@
             warpCorners[1] = { x: w * 0.9, y: h * 0.1 }; 
             warpCorners[2] = { x: w * 0.9, y: h * 0.9 }; 
             warpCorners[3] = { x: w * 0.1, y: h * 0.9 }; 
-            drawUIOverlay(); // Gambar garis di lapisan overlay transparan
+
+            drawUIOverlay(); // Panggil fungsi draw untuk memunculkan garis ungu di Overlay
         }
 
         function cancelCrop() {
             isCropModeActive = false;
             document.getElementById('editor-title-status').innerText = "AI Scanner Preview";
             document.getElementById('normal-editor-tools').classList.remove('hidden');
-            document.getElementById('action-download-panel').classList.remove('hidden');
             document.getElementById('crop-active-tools').classList.add('hidden');
-            drawUIOverlay(); // Bersihkan garis di overlay transparan
+            
+            drawUIOverlay(); // Karena isCropModeActive False, fungsi ini akan membersihkan garis ungu
         }
 
         function applyWarpCrop() {
@@ -437,7 +463,7 @@
             ai_loading.classList.remove('hidden');
 
             setTimeout(() => {
-                // Resolusi render hasil warp ditetapkan di 1200px lebar HD
+                // Resolusi output dokumen A4 (lebar standar HD 1200px)
                 const outW = 1200; const outH = Math.round(outW * 1.4142); 
                 const warpCanvas = document.createElement('canvas');
                 warpCanvas.width = outW; warpCanvas.height = outH;
@@ -471,22 +497,21 @@
                 img_obj.onload = function() {
                     rotationAngle = 0;
                     document.getElementById('normal-editor-tools').classList.remove('hidden');
-                    document.getElementById('action-download-panel').classList.remove('hidden');
                     document.getElementById('crop-active-tools').classList.add('hidden');
                     document.getElementById('editor-title-status').innerText = "AI Scanner Preview";
                     
                     renderFinalOutput();
                     calculateAndSetInitialFitScale(); 
-                    saveStateToHistory(); // Rekam hasil potongan ke riwayat Undo/Redo
+                    saveStateToHistory(); 
                     ai_loading.classList.add('hidden');
                 };
                 img_obj.src = warpCanvas.toDataURL('image/jpeg', 1.0);
             }, 60);
         }
 
-        // --- CORE ENGINE RENDERING MURNI ---
+        // --- CORE RENDERING ENGINE ---
         function renderFinalOutput() {
-            if(typeof v_i_c !== 'function' || !v_i_c()) { canvas.width = 100; return; }
+            if(!img_obj || typeof v_i_c !== 'function' || !v_i_c()) return;
 
             const isRotatedOrtho = (rotationAngle === 90 || rotationAngle === 270);
             let displayW = isRotatedOrtho ? img_obj.height : img_obj.width;
@@ -495,12 +520,11 @@
             const max_h = 2000; 
             if (displayH > max_h) { const sc = max_h / displayH; displayH = max_h; displayW = displayW * sc; }
 
-            // Sesuaikan ukuran kedua kanvas (Output Gambar & Overlay Interaktif)
             canvas.width = displayW; canvas.height = displayH;
             overlayCanvas.width = displayW; overlayCanvas.height = displayH;
 
-            // Gambar data murni pada kanvas Output (Bersih tanpa coretan UI)
             ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
             ctx.save();
             ctx.translate(displayW / 2, displayH / 2);
             ctx.rotate((rotationAngle * Math.PI) / 180);
@@ -508,9 +532,31 @@
             else ctx.drawImage(img_obj, -displayW / 2, -displayH / 2, displayW, displayH);
             ctx.restore();
 
-            drawUIOverlay(); // Panggil fungsi gambar UI untuk dieksekusi di kanvas transparan atasnya
+            applyBrightenAndContrast(0, 0, canvas.width, canvas.height);
+            drawUIOverlay(); 
         }
 
+        function applyBrightenAndContrast(x, y, w, h) {
+            try {
+                const img_d = ctx.getImageData(x, y, w, h);
+                const pix = img_d.data;
+                let total_l = 0; let count = 0;
+                for (let i = 0; i < pix.length; i += 16) { total_l += (0.299 * pix[i] + 0.587 * pix[i+1] + 0.114 * pix[i+2]); count++; }
+                const avg_l = total_l / count;
+                let b_adj = 15; let c_adj = 1.15; 
+                if (avg_l < 120) { b_adj = (120 - avg_l) * 0.45; c_adj = 1.25; }
+                
+                const fact = (259 * (c_adj + 255)) / (255 * (259 - c_adj));
+                for (let i = 0; i < pix.length; i += 4) {
+                    pix[i]   = fact * (pix[i] + b_adj - 128) + 128; 
+                    pix[i+1] = fact * (pix[i+1] + b_adj - 128) + 128; 
+                    pix[i+2] = fact * (pix[i+2] + b_adj - 128) + 128; 
+                }
+                ctx.putImageData(img_d, x, y);
+            } catch (e) {}
+        }
+
+        // PENTING: Semua garis interaktif murni digambar di oCtx (Overlay Canvas)
         function drawUIOverlay() {
             oCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
             
@@ -522,7 +568,6 @@
             oCtx.lineTo(warpCorners[2].x, warpCorners[2].y); oCtx.lineTo(warpCorners[3].x, warpCorners[3].y);
             oCtx.closePath(); oCtx.stroke();
 
-            // Peneduh area luar potongan crop
             oCtx.fillStyle = "rgba(0,0,0,0.65)";
             oCtx.beginPath();
             oCtx.moveTo(0,0); oCtx.lineTo(overlayCanvas.width,0); oCtx.lineTo(overlayCanvas.width,overlayCanvas.height); oCtx.lineTo(0,overlayCanvas.height);
@@ -537,16 +582,15 @@
             });
         }
 
-        // --- SISTEM INPUT GESTUR PEMETAAN KOORDINAT YANG TEPAT ---
+        // --- SISTEM INPUT GESTUR PEMETAAN KOORDINAT ---
         function getCanvasMousePos(e) {
-            // Karena canvas-wrap di-scale via CSS, kita gunakan rect dari output-canvas
-            const rect = canvas.getBoundingClientRect();
+            const rect = overlayCanvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
             
             return {
-                x: ((clientX - rect.left) / rect.width) * canvas.width,
-                y: ((clientY - rect.top) / rect.height) * canvas.height,
+                x: ((clientX - rect.left) / rect.width) * overlayCanvas.width,
+                y: ((clientY - rect.top) / rect.height) * overlayCanvas.height,
                 rawX: clientX, rawY: clientY
             };
         }
@@ -565,16 +609,16 @@
         view_window.addEventListener('mousemove', (e) => {
             const pos = getCanvasMousePos(e);
             if (isCropModeActive && activeCornerIndex !== -1) {
-                warpCorners[activeCornerIndex].x = Math.max(0, Math.min(pos.x, canvas.width));
-                warpCorners[activeCornerIndex].y = Math.max(0, Math.min(pos.y, canvas.height));
-                drawUIOverlay(); // Cukup perbarui overlay, tak perlu render ulang foto berat
+                warpCorners[activeCornerIndex].x = Math.max(0, Math.min(pos.x, overlayCanvas.width));
+                warpCorners[activeCornerIndex].y = Math.max(0, Math.min(pos.y, overlayCanvas.height));
+                drawUIOverlay(); // Hanya update overlay, hemat memori
                 return;
             }
             if (isPanningView) {
                 const cx = e.touches ? e.touches[0].clientX : e.clientX;
                 const cy = e.touches ? e.touches[0].clientY : e.clientY;
                 panOffset.x = cx - panStart.x; panOffset.y = cy - panStart.y;
-                applyZoomPanStyle(); // Clamp bekerja di dalam sini untuk mencegah keluar batas
+                applyZoomPanStyle(); 
             }
         });
 
@@ -603,14 +647,14 @@
                 const zoomChange = (scaleDiff - 1) * zoomScale * 0.8;
                 zoomScale = Math.max(defaultFitScale, Math.min(zoomScale + zoomChange, defaultFitScale * 5.0)); 
                 initialPinchDist = currentDist;
-                applyZoomPanStyle(); 
+                applyZoomPanStyle();
             } else if (e.touches.length === 1) {
                 const pos = getCanvasMousePos(e);
                 if (isCropModeActive && activeCornerIndex !== -1) {
                     e.preventDefault();
-                    warpCorners[activeCornerIndex].x = Math.max(0, Math.min(pos.x, canvas.width));
-                    warpCorners[activeCornerIndex].y = Math.max(0, Math.min(pos.y, canvas.height));
-                    drawUIOverlay(); // Cukup perbarui overlay
+                    warpCorners[activeCornerIndex].x = Math.max(0, Math.min(pos.x, overlayCanvas.width));
+                    warpCorners[activeCornerIndex].y = Math.max(0, Math.min(pos.y, overlayCanvas.height));
+                    drawUIOverlay(); 
                     return;
                 }
                 if (isPanningView) {
@@ -622,7 +666,7 @@
 
         view_window.addEventListener('touchend', () => { isPanningView = false; activeCornerIndex = -1; initialPinchDist = null; });
 
-        // --- GENERATE PDF KUALITAS TINGGI BEBAS GARIS CROP ---
+        // --- GENERATE PDF ---
         function t1_d_p() {
             try { if(!v_i_c() || typeof v_i_c !== 'function') return; } catch(e) { return; }
 
@@ -636,7 +680,7 @@
             if (compressMode === 'med') { exportQuality = 0.80; exportScaleFactor = 0.65; }
             else if (compressMode === 'low') { exportQuality = 0.60; exportScaleFactor = 0.40; }
 
-            // Kanvas Murni Output sudah dijamin BERSIH karena UI berada di Overlay Canvas.
+            // Kanvas Murni Output sudah dijamin BERSIH karena UI berada di Overlay Canvas (oCtx).
             let targetExportCanvas = canvas;
             if (exportScaleFactor < 1.0) {
                 targetExportCanvas = document.createElement('canvas');
@@ -656,7 +700,7 @@
             if (renderH > p_h - (m * 2)) { renderH = p_h - (m * 2); renderW = renderH * (canvas.width / canvas.height); }
 
             pdf.addImage(i_d, 'JPEG', (p_w - renderW) / 2, (p_h - renderH) / 2, renderW, renderH);
-            pdf.save('CO-Document-Scanned_'+Date.now()+'.pdf');
+            pdf.save('Scanned_'+Date.now()+'.pdf');
         }
     </script>
 </body>
