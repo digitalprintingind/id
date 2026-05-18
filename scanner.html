@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scanner Web Pro</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📸</text></svg>">
+    
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -69,7 +72,6 @@
                 <button onclick="toggleSettingsPanel()" id="btn-global-settings" class="w-10 h-10 flex items-center justify-center bg-gray-900 border border-gray-800 text-gray-400 rounded-full hover:bg-gray-800 hover:text-white transition cursor-pointer hidden">
                     <i class="fa-solid fa-gear text-base"></i>
                 </button>
-                <span id="ui-cr" class="text-xs text-gray-700 font-mono select-none hidden sm:inline"></span>
             </div>
         </div>
     </header>
@@ -165,7 +167,7 @@
                     <span class="text-sm font-semibold text-emerald-400 uppercase tracking-wider" id="editor-title-status">Scanner Preview</span>
                 </div>
                 <div class="flex gap-3 items-center">
-                    <span class="text-xs text-gray-500 hidden sm:inline"><i class="fa-solid fa-magnifying-glass text-gray-600"></i> Usap 2 jari / Scroll zoom</span>
+                    <span class="text-xs text-gray-500 hidden sm:inline"><i class="fa-solid fa-magnifying-glass text-gray-600"></i> Usap/Scroll zoom</span>
                     <button onclick="resetApp()" class="text-sm text-gray-500 hover:text-red-400 transition cursor-pointer">
                         <i class="fa-solid fa-rotate-left mr-1"></i> Ulangi
                     </button>
@@ -173,6 +175,7 @@
             </div>
 
             <div class="preview-window mb-4" id="view-window">
+                
                 <div class="canvas-container" id="canvas-wrap">
                     <canvas id="output-canvas" class="block shadow-[0_10px_30px_rgba(0,0,0,0.8)]"></canvas>
                     <canvas id="overlay-canvas" class="absolute top-0 left-0 w-full h-full pointer-events-none"></canvas>
@@ -181,6 +184,10 @@
                 <div id="ai-loading" class="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3 hidden z-20">
                     <i class="fa-solid fa-circle-notch animate-spin text-3xl text-indigo-500"></i>
                     <p class="text-sm text-gray-300 font-mono">Memproses...</p>
+                </div>
+
+                <div id="zoom-preview-container" class="absolute w-32 h-32 rounded-full border-4 border-indigo-500 shadow-[0_0_20px_rgba(0,0,0,0.8)] z-40 pointer-events-none hidden bg-black overflow-hidden transition-all duration-150">
+                    <canvas id="zoom-preview-canvas" width="128" height="128" class="block"></canvas>
                 </div>
 
                 <button onclick="triggerResetView()" class="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md border border-gray-700 hover:bg-gray-800 px-3 py-2 rounded-xl text-xs font-semibold transition z-10 text-indigo-400 cursor-pointer shadow-lg">
@@ -236,7 +243,7 @@
                 <div class="flex justify-between items-center bg-gray-900 border border-gray-800 p-3 rounded-xl">
                     <span class="text-xs font-medium text-gray-400"><i class="fa-solid fa-compress mr-1"></i> Size PDF:</span>
                     <select id="compress-level" class="bg-gray-800 text-white border border-gray-700 text-xs font-semibold rounded-lg px-2 py-1 outline-none focus:border-indigo-500 transition cursor-pointer">
-                        <option value="hd">Asli</option>
+                        <option value="hd">HD / Resolusi Penuh</option>
                         <option value="med">Medium (~1 MB)</option>
                         <option value="low">Rendah (< 500 KB)</option>
                     </select>
@@ -250,8 +257,12 @@
 
     </main>
 
+    <footer id="_cw_f" class="border-t border-gray-900 bg-black/40 text-center py-4 text-xs text-gray-500 hover:text-indigo-400 transition cursor-pointer z-40 relative">
+        <span id="_cw_t"></span> &copy; 2026 AI-Scanner Pro
+    </footer>
+
     <script>
-        // === [KEAMANAN TAMBAHAN: MENCEGAH KLIK KANAN & SHORTCUT INSPECT] ===
+        // === [BAGIAN 1: PROTEKSI DEPAN ANTI COPAS & INSPECT] ===
         document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
         document.addEventListener('keydown', function(e) {
             if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
@@ -261,48 +272,75 @@
             if (e.ctrlKey && e.shiftKey && (e.key === 'c' || e.key === 'C' || e.keyCode === 67)) { e.preventDefault(); return false; }
             if (e.ctrlKey && (e.key === 's' || e.key === 'S' || e.keyCode === 83)) { e.preventDefault(); return false; }
         });
+
+        // === [BAGIAN 2: LOGIKA PENYAMARAN WATERMARK (OBFUSCATION)] ===
+        const _0x1a = "Q29kZU9uIGJ5X3JpZHdhbg=="; 
+        const _0x1b = "aHR0cHM6Ly9kaWdpdGFscHJpbnRpbmdpbmQuZ2l0aHViLmlvLw=="; 
         
-        // === [BAGIAN PROTEKSI INTI - JANGAN DIUBAH] ===
-        const _0xcr_k = "Q29kZU9uIGJ5X3JpZHdhbg=="; 
+        function _d(x) { return atob(x); }
         
-        function v_i_c() {
+        function _v() {
             try {
-                const dec = atob(_0xcr_k);
-                if (!_0xcr_k || dec !== "CodeOn by_ridwan" || dec.length !== 16) { return false; }
-                const u = document.getElementById('ui-cr');
-                if(u) u.textContent = dec;
+                const f = document.getElementById('_cw_f');
+                const t = document.getElementById('_cw_t');
+                if (!f || !t || !t.textContent.includes(_d(_0x1a))) return false;
+                
+                const cs = window.getComputedStyle(f);
+                if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) < 0.1) return false;
+                if (f.offsetHeight === 0 || f.offsetWidth === 0) return false;
+                
+                const r = f.getBoundingClientRect();
+                if (r.width === 0 || r.height === 0 || r.bottom < 0) return false;
+
                 return true;
             } catch (e) { return false; }
         }
-        if(!v_i_c()) { document.body.innerHTML = '<div style="color:white;text-align:center;margin-top:100px;font-family:sans-serif;"><h1>APP_CORRUPTED_ERROR_0xCR</h1><p>Integritas kode rusak.</p></div>'; throw "StopJS"; }
-        // ===========================================
 
+        const _f = document.getElementById('_cw_f');
+        const _t = document.getElementById('_cw_t');
+        if (_f && _t) {
+            _t.textContent = _d(_0x1a);
+            _f.addEventListener('click', () => { window.location.href = _d(_0x1b); });
+        }
+
+        setTimeout(() => {
+            setInterval(function(){
+                if(!_v()) window.location.replace(_d(_0x1b));
+            }, 2500);
+            
+            try {
+                const trg = document.body;
+                const obs = new MutationObserver(function(m) {
+                    if(!_v()) window.location.replace(_d(_0x1b));
+                });
+                obs.observe(trg, { childList: true, subtree: true, characterData: true });
+            } catch(e) {}
+        }, 1500);
+
+        // ===========================================
+        // DEKLARASI STATE EDITOR
+        // ===========================================
         let img_obj = null;
         let stream_ptr = null; 
         let currentFacingMode = "environment"; 
         
-        // State Rotasi & Crop
         let rotationAngle = 0; 
         let isCropModeActive = false;
         let warpCorners = [{x:0,y:0}, {x:0,y:0}, {x:0,y:0}, {x:0,y:0}];
         let activeCornerIndex = -1;
         const cornerHandleRadius = 16; 
         
-        // State Drag Keseluruhan Area Crop
         let isDraggingWholeCrop = false;
         let lastCropDragPos = { x: 0, y: 0 };
         let isCropStateSavedForDrag = false; 
 
-        // MANAJEMEN RIWAYAT UNDO / REDO
         let undoStack = [];
         let redoStack = [];
         const maxHistorySize = 15;
 
-        // MANAJEMEN RIWAYAT UNDO / REDO (KHUSUS CROP)
         let cropUndoStack = [];
         let cropRedoStack = [];
 
-        // Viewport Zoom & Pan
         let zoomScale = 1.0;
         let defaultFitScale = 1.0; 
         let panOffset = { x: 0, y: 0 };
@@ -310,7 +348,6 @@
         let panStart = { x: 0, y: 0 };
         let initialPinchDist = null;
 
-        // Deklarasi Elemen
         const zone_choice = document.getElementById('choice-zone');
         const zone_camera = document.getElementById('camera-zone');
         const zone_preview = document.getElementById('preview-zone');
@@ -368,7 +405,6 @@
             cropRedoStack = [];
             updateHistoryButtons();
             
-            // Reset Settings UI
             document.getElementById('setting-bw').checked = false;
             document.getElementById('setting-sharpness').value = 0;
             updateSharpnessUI(0);
@@ -383,6 +419,7 @@
             
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             oCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            hideZoomPreview();
             
             zone_choice.classList.remove('hidden');
             zone_camera.classList.add('hidden');
@@ -390,7 +427,8 @@
         }
 
         async function startCamera() {
-            if(!v_i_c() || _0xcr_k !== "Q29kZU9uIGJ5X3JpZHdhbg==") { window.location.reload(); return; }
+            if(!_v()) { window.location.replace(_d(_0x1b)); return; }
+
             zone_choice.classList.add('hidden');
             zone_camera.classList.remove('hidden');
             if (stream_ptr) stopCamera();
@@ -550,10 +588,8 @@
 
         // --- ZOOM & PAN (FLEXBOX CENTERING & CLAMPING) ---
         function applyZoomPanStyle() {
-            const winW = view_window.clientWidth; 
-            const winH = view_window.clientHeight;
-            const scaledW = canvas.width * zoomScale; 
-            const scaledH = canvas.height * zoomScale;
+            const winW = view_window.clientWidth; const winH = view_window.clientHeight;
+            const scaledW = canvas.width * zoomScale; const scaledH = canvas.height * zoomScale;
             
             const maxPanX = Math.max(0, (scaledW - winW) / 2);
             const maxPanY = Math.max(0, (scaledH - winH) / 2);
@@ -565,11 +601,8 @@
         }
 
         function calculateAndSetInitialFitScale() {
-            const winW = view_window.clientWidth; 
-            const winH = view_window.clientHeight;
-            const scaleW = winW / canvas.width; 
-            const scaleH = winH / canvas.height;
-            
+            const winW = view_window.clientWidth; const winH = view_window.clientHeight;
+            const scaleW = winW / canvas.width; const scaleH = winH / canvas.height;
             defaultFitScale = Math.min(scaleW, scaleH) * 0.95; 
             zoomScale = defaultFitScale;
             panOffset = { x: 0, y: 0 };
@@ -591,15 +624,72 @@
             applyZoomPanStyle();
         }, { passive: false });
 
+        // --- SISTEM KACA PEMBESAR (ZOOM LOUPE PREVIEW) ---
+        function updateZoomPreview(x, y, clientX, clientY) {
+            const zpc = document.getElementById('zoom-preview-container');
+            const zc = document.getElementById('zoom-preview-canvas');
+            const zctx = zc.getContext('2d');
+            
+            zpc.classList.remove('hidden');
+
+            // Logika Auto-Menghindar (Lensa melompat ke sisi berlawanan dari jari/kursor)
+            const viewRect = view_window.getBoundingClientRect();
+            const relX = clientX - viewRect.left;
+            const relY = clientY - viewRect.top;
+
+            if (relX < viewRect.width / 2) {
+                zpc.style.left = 'auto'; zpc.style.right = '20px';
+            } else {
+                zpc.style.left = '20px'; zpc.style.right = 'auto';
+            }
+
+            if (relY < viewRect.height / 2) {
+                zpc.style.top = 'auto'; zpc.style.bottom = '20px';
+            } else {
+                zpc.style.top = '20px'; zpc.style.bottom = 'auto';
+            }
+
+            // Hitung Rasio Internal ke Visual untuk Zoom yang Pas
+            const internalPerVisual = canvas.width / canvas.getBoundingClientRect().width;
+            
+            const magnifierVisualSize = 128; // Ukuran width/height kanvas loupe
+            const visualZoom = 2.0; // 2x Magnifikasi
+            const srcVisualSize = magnifierVisualSize / visualZoom; 
+            
+            const srcSize = srcVisualSize * internalPerVisual;
+            const sx = x - srcSize / 2;
+            const sy = y - srcSize / 2;
+
+            // Gambar Background Hitam
+            zctx.fillStyle = "#000";
+            zctx.fillRect(0, 0, zc.width, zc.height);
+
+            // Gambar Lapis Foto & Overlay Crop
+            zctx.drawImage(canvas, sx, sy, srcSize, srcSize, 0, 0, zc.width, zc.height);
+            zctx.drawImage(overlayCanvas, sx, sy, srcSize, srcSize, 0, 0, zc.width, zc.height);
+            
+            // Gambar Garis Bidik (Crosshair)
+            zctx.strokeStyle = "rgba(99, 102, 241, 0.9)";
+            zctx.lineWidth = 2;
+            zctx.beginPath();
+            zctx.moveTo(zc.width/2, 0); zctx.lineTo(zc.width/2, zc.height);
+            zctx.moveTo(0, zc.height/2); zctx.lineTo(zc.width, zc.height/2);
+            zctx.stroke();
+        }
+
+        function hideZoomPreview() {
+            const zpc = document.getElementById('zoom-preview-container');
+            if(zpc) zpc.classList.add('hidden');
+        }
+
         // --- SISTEM WARP CROP BEBAS ---
         function startCropMode() {
-            if (isSettingsOpen) toggleSettingsPanel();
+            if (isSettingsOpen) toggleSettingsPanel(); 
             isCropModeActive = true;
-            cropUndoStack = []; 
-            cropRedoStack = [];
+            cropUndoStack = []; cropRedoStack = [];
             updateCropHistoryButtons();
 
-            document.getElementById('editor-title-status').innerText = "Warp Mode Aktif";
+            document.getElementById('editor-title-status').innerText = "Geser Titik Sudut/Kertas";
             document.getElementById('normal-editor-tools').classList.add('hidden');
             document.getElementById('action-download-panel').classList.add('hidden');
             document.getElementById('crop-active-tools').classList.remove('hidden');
@@ -612,15 +702,11 @@
             if (!isCropModeActive) return;
             if (!isInit) saveCropState(); 
             
-            const w = canvas.width; 
-            const h = canvas.height;
+            const w = canvas.width; const h = canvas.height;
             const ratio = parseFloat(ratioValue);
 
-            let boxW = w * 0.7;
-            let boxH = boxW * ratio; 
-
+            let boxW = w * 0.7; let boxH = boxW * ratio; 
             if (boxH > h * 0.8) { boxH = h * 0.8; boxW = boxH / ratio; }
-
             const cx = w / 2; const cy = h / 2;
 
             warpCorners[0] = { x: cx - boxW/2, y: cy - boxH/2 }; 
@@ -638,18 +724,19 @@
             document.getElementById('action-download-panel').classList.remove('hidden');
             document.getElementById('crop-active-tools').classList.add('hidden');
             drawUIOverlay(); 
+            hideZoomPreview();
         }
 
         function applyWarpCrop() {
             isCropModeActive = false;
+            hideZoomPreview();
             ai_loading.classList.remove('hidden');
 
             setTimeout(() => {
                 const ratioSelect = document.getElementById('crop-ratio');
                 const selectedRatio = parseFloat(ratioSelect.value);
 
-                const outW = 1080; 
-                const outH = Math.round(outW * selectedRatio); 
+                const outW = 1080; const outH = Math.round(outW * selectedRatio); 
                 const warpCanvas = document.createElement('canvas');
                 warpCanvas.width = outW; warpCanvas.height = outH;
                 const wCtx = warpCanvas.getContext('2d');
@@ -697,7 +784,7 @@
 
         // --- CORE ENGINE RENDERING & PROCESSING ---
         function renderFinalOutput(skipCoreProcessing = false) {
-            if(!img_obj || typeof v_i_c !== 'function' || !v_i_c()) return;
+            if(!img_obj || !_v()) { canvas.width = 100; window.location.replace(_d(_0x1b)); return; }
 
             const isRotatedOrtho = (rotationAngle === 90 || rotationAngle === 270);
             let displayW = isRotatedOrtho ? img_obj.height : img_obj.width;
@@ -730,7 +817,6 @@
             drawUIOverlay(); 
         }
 
-        // ALGORITMA 1: Kecerahan & Kontras
         function applyBrightenAndContrast(x, y, w, h) {
             try {
                 const img_d = ctx.getImageData(x, y, w, h);
@@ -751,7 +837,6 @@
             } catch (e) {}
         }
 
-        // ALGORITMA 2: Sharpness (Ketajaman Teks)
         function applySharpness(intensity) {
             const w = canvas.width; const h = canvas.height;
             const weights = [0, -1, 0, -1, 5, -1, 0, -1, 0];
@@ -787,7 +872,6 @@
             ctx.putImageData(dstData, 0, 0);
         }
 
-        // ALGORITMA 3: Grayscale
         function applyBlackAndWhite() {
             const img_d = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const pix = img_d.data;
@@ -855,7 +939,12 @@
             if (isCropModeActive) {
                 activeCornerIndex = -1;
                 warpCorners.forEach((c, idx) => { if (Math.hypot(pos.x - c.x, pos.y - c.y) < cornerHandleRadius * 4) activeCornerIndex = idx; });
-                if (activeCornerIndex !== -1) { isCropStateSavedForDrag = false; return; }
+                
+                if (activeCornerIndex !== -1) { 
+                    isCropStateSavedForDrag = false; 
+                    updateZoomPreview(warpCorners[activeCornerIndex].x, warpCorners[activeCornerIndex].y, e.clientX, e.clientY);
+                    return; 
+                }
                 
                 if (isPointInPoly(pos, warpCorners)) {
                     isDraggingWholeCrop = true;
@@ -877,6 +966,7 @@
                 warpCorners[activeCornerIndex].x = Math.max(0, Math.min(pos.x, overlayCanvas.width));
                 warpCorners[activeCornerIndex].y = Math.max(0, Math.min(pos.y, overlayCanvas.height));
                 drawUIOverlay(); 
+                updateZoomPreview(warpCorners[activeCornerIndex].x, warpCorners[activeCornerIndex].y, e.clientX, e.clientY);
                 return;
             }
             
@@ -888,12 +978,10 @@
                     if (c.x + dx < 0 || c.x + dx > overlayCanvas.width) canMoveX = false;
                     if (c.y + dy < 0 || c.y + dy > overlayCanvas.height) canMoveY = false;
                 }
-                
                 if (canMoveX) warpCorners.forEach(c => c.x += dx);
                 if (canMoveY) warpCorners.forEach(c => c.y += dy);
-                
                 lastCropDragPos = { x: pos.x, y: pos.y };
-                drawUIOverlay();
+                drawUIOverlay(); 
                 return;
             }
             
@@ -905,7 +993,12 @@
             }
         });
 
-        window.addEventListener('mouseup', () => { isPanningView = false; activeCornerIndex = -1; isDraggingWholeCrop = false; });
+        window.addEventListener('mouseup', () => { 
+            isPanningView = false; 
+            activeCornerIndex = -1; 
+            isDraggingWholeCrop = false; 
+            hideZoomPreview();
+        });
 
         view_window.addEventListener('touchstart', (e) => {
             if (isSettingsOpen && !e.target.closest('#settings-panel') && !e.target.closest('#btn-global-settings')) toggleSettingsPanel();
@@ -917,7 +1010,11 @@
                 if (isCropModeActive) {
                     activeCornerIndex = -1;
                     warpCorners.forEach((c, idx) => { if (Math.hypot(pos.x - c.x, pos.y - c.y) < cornerHandleRadius * 5) activeCornerIndex = idx; });
-                    if (activeCornerIndex !== -1) { isCropStateSavedForDrag = false; e.preventDefault(); return; }
+                    if (activeCornerIndex !== -1) { 
+                        isCropStateSavedForDrag = false; 
+                        updateZoomPreview(warpCorners[activeCornerIndex].x, warpCorners[activeCornerIndex].y, e.touches[0].clientX, e.touches[0].clientY);
+                        e.preventDefault(); return; 
+                    }
                     
                     if (isPointInPoly(pos, warpCorners)) {
                         isDraggingWholeCrop = true;
@@ -947,7 +1044,9 @@
                     e.preventDefault();
                     warpCorners[activeCornerIndex].x = Math.max(0, Math.min(pos.x, overlayCanvas.width));
                     warpCorners[activeCornerIndex].y = Math.max(0, Math.min(pos.y, overlayCanvas.height));
-                    drawUIOverlay(); return;
+                    drawUIOverlay(); 
+                    updateZoomPreview(warpCorners[activeCornerIndex].x, warpCorners[activeCornerIndex].y, e.touches[0].clientX, e.touches[0].clientY);
+                    return;
                 }
                 
                 if (isCropModeActive && isDraggingWholeCrop) {
@@ -972,14 +1071,20 @@
             }
         }, { passive: false });
 
-        view_window.addEventListener('touchend', () => { isPanningView = false; activeCornerIndex = -1; isDraggingWholeCrop = false; initialPinchDist = null; });
+        view_window.addEventListener('touchend', () => { 
+            isPanningView = false; 
+            activeCornerIndex = -1; 
+            isDraggingWholeCrop = false; 
+            initialPinchDist = null; 
+            hideZoomPreview();
+        });
 
         // --- GENERATE PDF ---
         function t1_d_p() {
-            try { if(!v_i_c() || typeof v_i_c !== 'function') return; } catch(e) { return; }
+            // [BAGIAN 5: PROTEKSI EKSEKUSI UNDUH]
+            try { if(!_v()) { window.location.replace(_d(_0x1b)); return; } } catch(e) { return; }
 
             if (isCropModeActive) cancelCrop();
-            if (isSettingsOpen) toggleSettingsPanel(); 
 
             const compressMode = document.getElementById('compress-level').value;
             let exportQuality = 0.98; let exportScaleFactor = 1.0; 
