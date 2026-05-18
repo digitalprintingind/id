@@ -19,13 +19,8 @@
         .ai-glow { box-shadow: 0 0 20px rgba(99, 102, 241, 0.2); }
         .ai-glow-strong { box-shadow: 0 0 30px rgba(168, 85, 247, 0.4); }
         
-        #camera-feed {
-            object-fit: cover;
-        }
-        /* Efek mirror otomatis hanya saat menggunakan kamera depan */
-        .mirror-view {
-            transform: scaleX(-1);
-        }
+        #camera-feed { object-fit: cover; }
+        .mirror-view { transform: scaleX(-1); }
     </style>
 </head>
 <body class="text-gray-100 min-h-screen flex flex-col justify-between">
@@ -55,7 +50,7 @@
                     <i class="fa-solid fa-camera text-3xl text-purple-400"></i>
                 </div>
                 <h3 class="text-xl font-semibold mb-2 text-white">Ambil Foto</h3>
-                <p class="text-gray-400 text-sm">Gunakan kamera perangkat Anda untuk scan dokumen atau foto secara langsung.</p>
+                <p class="text-gray-400 text-sm">Gunakan kamera perangkat Anda secara langsung.</p>
             </div>
 
             <div class="group bg-gray-900/40 border-2 border-dashed border-indigo-500/30 hover:border-indigo-400 rounded-3xl p-8 text-center cursor-pointer transition-all duration-300 hover:-translate-y-1 ai-glow hover:ai-glow-strong overflow-hidden relative">
@@ -64,49 +59,26 @@
                     <i class="fa-solid fa-cloud-arrow-up text-3xl text-indigo-400"></i>
                 </div>
                 <h3 class="text-xl font-semibold mb-2 text-white">Unggah Gambar</h3>
-                <p class="text-gray-400 text-sm">Pilih foto dokumen/orang yang sudah ada dari galeri perangkat Anda.</p>
+                <p class="text-gray-400 text-sm">Pilih foto dari galeri perangkat Anda.</p>
             </div>
         </div>
 
         <div id="camera-zone" class="w-full max-w-md bg-gray-900 border border-gray-800 rounded-3xl p-4 hidden ai-glow overflow-hidden relative">
             <div class="relative rounded-2xl overflow-hidden border border-gray-700 bg-black aspect-[3/4]">
-                <video id="camera-feed" autoplay playsinline class="w-full h-full object-cover hidden"></video>
-                <canvas id="camera-canvas" class="w-full h-full object-cover"></canvas>
-                
+                <video id="camera-feed" autoplay playsinline class="w-full h-full object-cover"></video>
                 <div class="absolute inset-8 border-2 border-indigo-400/50 rounded-lg pointer-events-none z-10">
                     <div class="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-indigo-400 -translate-x-1 -translate-y-1"></div>
                     <div class="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-indigo-400 translate-x-1 -translate-y-1"></div>
                     <div class="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-indigo-400 -translate-x-1 translate-y-1"></div>
                     <div class="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-indigo-400 translate-x-1 translate-y-1"></div>
                 </div>
-
-                <div class="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-md px-3 py-1 rounded-full text-xs font-mono text-indigo-300 border border-indigo-500/30 z-10">
-                    AI BG: <span id="bg-status-text">Original</span>
-                </div>
             </div>
 
-            <div class="mt-4 bg-gray-950/80 border border-gray-800 p-3 rounded-2xl space-y-3">
-                <div class="flex justify-between items-center border-b border-gray-800 pb-2">
-                    <span class="text-xs text-gray-400 font-semibold uppercase tracking-wider"><i class="fa-solid fa-video mr-1"></i> Kontrol Kamera</span>
-                    <button onclick="switchCamera()" class="text-xs bg-gray-800 hover:bg-gray-700 text-indigo-400 px-3 py-1.5 rounded-lg transition font-medium cursor-pointer">
-                        <i class="fa-solid fa-camera-rotate mr-1"></i> Alihkan Kamera
-                    </button>
-                </div>
-
-                <div class="space-y-1.5">
-                    <span class="text-xs text-gray-400 font-semibold uppercase tracking-wider block"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> AI Ganti BG (Free)</span>
-                    <div class="grid grid-cols-3 gap-2 text-center text-xs">
-                        <button onclick="setAiBg('none')" id="bg-btn-none" class="bg-indigo-600 text-white p-2 rounded-xl transition font-medium cursor-pointer">
-                            <i class="fa-solid fa-ban block mb-1 text-sm"></i> Asli
-                        </button>
-                        <button onclick="setAiBg('color')" id="bg-btn-color" class="bg-gray-800 text-gray-300 hover:bg-gray-700 p-2 rounded-xl transition font-medium cursor-pointer">
-                            <i class="fa-solid fa-palette block mb-1 text-sm text-red-400"></i> Merah
-                        </button>
-                        <button onclick="setAiBg('office')" id="bg-btn-office" class="bg-gray-800 text-gray-300 hover:bg-gray-700 p-2 rounded-xl transition font-medium cursor-pointer">
-                            <i class="fa-solid fa-building block mb-1 text-sm text-sky-400"></i> Kantor
-                        </button>
-                    </div>
-                </div>
+            <div class="mt-3 flex justify-between items-center bg-gray-950 p-2 rounded-xl border border-gray-800">
+                <span class="text-xs text-gray-400 px-2">Mode Kamera</span>
+                <button onclick="switchCamera()" class="text-xs bg-gray-800 hover:bg-gray-700 text-indigo-400 px-3 py-1.5 rounded-lg transition cursor-pointer">
+                    <i class="fa-solid fa-camera-rotate mr-1"></i> Balik Kamera
+                </button>
             </div>
             
             <div class="flex justify-center gap-4 mt-4">
@@ -126,26 +98,50 @@
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                     </span>
-                    <span class="text-sm font-semibold text-emerald-400 uppercase tracking-wider">AI Enhanced Result</span>
+                    <span class="text-sm font-semibold text-emerald-400 uppercase tracking-wider">AI Studio Preview</span>
                 </div>
                 <button onclick="resetApp()" class="text-sm text-gray-500 hover:text-red-400 transition cursor-pointer">
                     <i class="fa-solid fa-rotate-left mr-1"></i> Ulangi
                 </button>
             </div>
 
-            <div class="relative rounded-2xl overflow-hidden border border-gray-700 bg-black flex justify-center items-center mb-6 max-h-[500px]">
-                <canvas id="output-canvas" class="max-w-full max-h-[500px] object-contain"></canvas>
+            <div class="relative rounded-2xl overflow-hidden border border-gray-700 bg-black flex justify-center items-center mb-4 max-h-[480px]">
+                <canvas id="output-canvas" class="max-w-full max-h-[480px] object-contain"></canvas>
+                <div id="ai-loading" class="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3 hidden z-20">
+                    <i class="fa-solid fa-circle-notch animate-spin text-3xl text-indigo-500"></i>
+                    <p class="text-sm text-gray-300 font-mono">AI Refine Edge & Segmenting...</p>
+                </div>
+            </div>
+
+            <div class="bg-gray-950 border border-gray-800 p-4 rounded-2xl mb-4">
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-2">
+                    <i class="fa-solid fa-palette text-indigo-400 mr-1"></i> Opsi Latar Belakang Pas Foto (AI Free)
+                </span>
+                <div class="grid grid-cols-4 gap-2 text-xs">
+                    <button onclick="changeSelectedBg('none')" id="btn-bg-none" class="bg-indigo-600 text-white p-2.5 rounded-xl transition font-medium cursor-pointer border border-transparent">
+                        Asli
+                    </button>
+                    <button onclick="changeSelectedBg('white')" id="btn-bg-white" class="bg-gray-800 text-gray-300 hover:bg-gray-700 p-2.5 rounded-xl transition font-medium cursor-pointer border border-transparent">
+                        <span class="inline-block w-3 h-3 bg-white rounded-full mr-1 align-middle border border-gray-400"></span> Putih
+                    </button>
+                    <button onclick="changeSelectedBg('red')" id="btn-bg-red" class="bg-gray-800 text-gray-300 hover:bg-gray-700 p-2.5 rounded-xl transition font-medium cursor-pointer border border-transparent">
+                        <span class="inline-block w-3 h-3 bg-red-600 rounded-full mr-1 align-middle"></span> Merah
+                    </button>
+                    <button onclick="changeSelectedBg('blue')" id="btn-bg-blue" class="bg-gray-800 text-gray-300 hover:bg-gray-700 p-2.5 rounded-xl transition font-medium cursor-pointer border border-transparent">
+                        <span class="inline-block w-3 h-3 bg-blue-600 rounded-full mr-1 align-middle"></span> Biru
+                    </button>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="p-3 bg-gray-950 border border-gray-800 rounded-xl flex items-center gap-3 text-xs text-gray-500">
                     <i class="fa-solid fa-wand-magic text-indigo-400 text-lg"></i>
                     <div>
-                        <p class="font-semibold text-gray-300">Auto-Enhancement Aktif</p>
-                        <p>Kecerahan dioptimalkan, dokumen dirapikan (A4).</p>
+                        <p class="font-semibold text-gray-300">Auto-Refine Aktif</p>
+                        <p>Kecerahan otomatis & penghalusan tepi potongan AI.</p>
                     </div>
                 </div>
-                <button id="btn-pdf" onclick="t1_d_p()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-indigo-500/20 cursor-pointer disabled:opacity-50">
+                <button id="btn-pdf" onclick="t1_d_p()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-indigo-500/20 cursor-pointer">
                     <i class="fa-solid fa-file-pdf text-lg"></i>
                     Unduh PDF (A4)
                 </button>
@@ -162,7 +158,7 @@
         <div class="bg-gray-900 border border-gray-800 w-full max-w-md rounded-2xl p-6 transform scale-95 transition-transform duration-300">
             <div class="flex justify-between items-start mb-4">
                 <h3 class="text-xl font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-robot text-indigo-400"></i> Fitur AI Scan
+                    <i class="fa-solid fa-robot text-indigo-400"></i> Fitur AI Scan Studio
                 </h3>
                 <button onclick="closeModal('info-modal')" class="text-gray-500 hover:text-white transition cursor-pointer">
                     <i class="fa-solid fa-xmark text-lg"></i>
@@ -171,10 +167,9 @@
             <div class="space-y-3 text-sm text-gray-300">
                 <p>Aplikasi ini memproses gambar Anda langsung di browser secara aman:</p>
                 <ul class="list-disc list-inside space-y-2 text-gray-400 font-light">
-                    <li><strong class="text-gray-200">Kamera / Unggah:</strong> Dua cara input dokumen.</li>
-                    <li><strong class="text-gray-200">AI Background:</strong> Memotong subjek manusia secara otomatis dan mengganti latar belakang secara instan tanpa server tambahan.</li>
-                    <li><strong class="text-gray-200">Auto-Enhance:</strong> Memperbaiki kecerahan & kontras foto yang gelap secara otomatis agar teks jelas.</li>
-                    <li><strong class="text-gray-200">Format A4:</strong> Memaksa proporsi gambar menjadi standar kertas A4 untuk PDF.</li>
+                    <li><strong class="text-gray-200">Kamera Depan/Belakang:</strong> Fleksibel untuk dokumen maupun potret mandiri.</li>
+                    <li><strong class="text-gray-200">Ganti BG Pas Foto:</strong> Setelah gambar diambil, Anda dapat memilih warna Putih, Merah, atau Biru secara instan dengan potongan rapi berkat fitur *Edge Smoothing*.</li>
+                    <li><strong class="text-gray-200">Auto-Enhance & A4:</strong> Memperbaiki pencahayaan otomatis dan merapikan output skala kertas A4.</li>
                 </ul>
             </div>
             <button onclick="closeModal('info-modal')" class="w-full mt-6 bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl text-sm font-semibold transition cursor-pointer">
@@ -202,25 +197,18 @@
         let img_obj = null;
         let stream_ptr = null; 
         let currentFacingMode = "environment"; 
-        let activeBgMode = "none"; // none, color, office
-        let isAiLoaded = false;
-        let animationFrameId = null;
+        let currentBgColor = "none"; // none, white, red, blue
+        
+        // Objek internal penampung hasil segmentasi AI agar ganti warna bisa instan tanpa panggil ulang model AI
+        let segmentationResults = null; 
 
         const zone_choice = document.getElementById('choice-zone');
         const zone_camera = document.getElementById('camera-zone');
         const zone_preview = document.getElementById('preview-zone');
         const video_feed = document.getElementById('camera-feed');
-        const cam_canvas = document.getElementById('camera-canvas');
-        const cam_ctx = cam_canvas.getContext('2d');
         const canvas = document.getElementById('output-canvas');
         const ctx = canvas.getContext('2d');
-
-        // Load Gambar Pre-set Virtual Office (Menggunakan Gambar Kantor Modern Abstrak)
-        const officeBgImg = new Image();
-        officeBgImg.src = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA="; 
-        // fallback warna biru muda jika gambar kosong
-        let officeLoaded = false;
-        officeBgImg.onload = () => { officeLoaded = true; };
+        const ai_loading = document.getElementById('ai-loading');
 
         // --- INITIALIZE MEDIAPIPE SELFIE SEGMENTATION ---
         const selfieSegmentation = new SelfieSegmentation({
@@ -228,55 +216,14 @@
         });
 
         selfieSegmentation.setOptions({
-            modelSelection: 1, // 0 = general, 1 = landscape (lebih ringan & cepat untuk HP)
+            modelSelection: 1 // Mode landscape agar ekstra cepat & akurat di HP
         });
 
+        // Callback utama saat AI selesai memproses gambar statis
         selfieSegmentation.onResults((results) => {
-            if (!stream_ptr) return;
-            
-            // Set dimensi canvas kamera sama dengan dimensi video input
-            if(cam_canvas.width !== video_feed.videoWidth) {
-                cam_canvas.width = video_feed.videoWidth;
-                cam_canvas.height = video_feed.videoHeight;
-            }
-
-            cam_ctx.save();
-            cam_ctx.clearRect(0, 0, cam_canvas.width, cam_canvas.height);
-            
-            // Efek mirror jika pakai kamera depan (user)
-            if (currentFacingMode === "user") {
-                cam_ctx.translate(cam_canvas.width, 0);
-                cam_ctx.scale(-1, 1);
-            }
-
-            // Gambar mask segmentasi ke buffer canvas jika mode AI aktif
-            if (activeBgMode !== "none") {
-                cam_ctx.drawImage(results.segmentationMask, 0, 0, cam_canvas.width, cam_canvas.height);
-                
-                // Ambil frame asli, buat komposisi subjek di atas background baru
-                cam_ctx.globalCompositeOperation = 'source-in';
-                cam_ctx.drawImage(results.image, 0, 0, cam_canvas.width, cam_canvas.height);
-                
-                // Gambar Latar Belakang Baru
-                cam_ctx.globalCompositeOperation = 'destination-over';
-                if (activeBgMode === "color") {
-                    // Latar belakang Merah Studio pas foto
-                    cam_ctx.fillStyle = '#D32F2F';
-                    cam_ctx.fillRect(0, 0, cam_canvas.width, cam_canvas.height);
-                } else if (activeBgMode === "office") {
-                    // Latar belakang suasana kantor
-                    cam_ctx.fillStyle = '#2A2E3D';
-                    cam_ctx.fillRect(0, 0, cam_canvas.width, cam_canvas.height);
-                    // Gambar aksen jendela tipis artifisial untuk kesan interior
-                    cam_ctx.fillStyle = '#3A3F54';
-                    cam_ctx.fillRect(cam_canvas.width/2, 0, cam_canvas.width/2, cam_canvas.height);
-                }
-            } else {
-                // Mode Original tanpa modifikasi AI
-                cam_ctx.drawImage(results.image, 0, 0, cam_canvas.width, cam_canvas.height);
-            }
-            cam_ctx.restore();
-            isAiLoaded = true;
+            segmentationResults = results;
+            renderFinalOutput();
+            ai_loading.classList.add('hidden');
         });
 
         // --- MODAL FUNCTIONS ---
@@ -296,6 +243,8 @@
         function resetApp() {
             stopCamera();
             img_obj = null;
+            segmentationResults = null;
+            currentBgColor = "none";
             document.getElementById('file-input').value = "";
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
@@ -306,7 +255,6 @@
 
         // --- CAMERA LOGIC ---
         async function startCamera() {
-            // Anti-Tamper Check
             if(!v_i_c() || _0xcr_k !== "Q29kZU9uIGJ5X3JpZHdhbg==") { window.location.reload(); return; }
 
             zone_choice.classList.add('hidden');
@@ -314,13 +262,10 @@
 
             if (stream_ptr) { stopCamera(); }
 
-            // Menyesuaikan class Mirroring CSS
             if (currentFacingMode === "user") {
                 video_feed.classList.add('mirror-view');
-                cam_canvas.classList.add('mirror-view');
             } else {
                 video_feed.classList.remove('mirror-view');
-                cam_canvas.classList.remove('mirror-view');
             }
 
             try {
@@ -333,19 +278,8 @@
                     audio: false 
                 });
                 video_feed.srcObject = stream_ptr;
-                
-                // Jalankan loop pemrosesan frame video ke AI MediaPipe
-                async function step() {
-                    if (!stream_ptr) return;
-                    if (video_feed.readyState >= 2) {
-                        await selfieSegmentation.send({ image: video_feed });
-                    }
-                    animationFrameId = requestAnimationFrame(step);
-                }
-                animationFrameId = requestAnimationFrame(step);
-
             } catch (err) {
-                alert("Gagal mengakses kamera.\n1. Pastikan Anda membuka di Chrome/Safari asli dengan HTTPS.\n2. Berikan izin akses kamera.\n\nError: " + err.message);
+                alert("Gagal mengakses kamera. Silakan buka lewat Google Chrome asli / HTTPS dan izinkan akses kamera.\n\nError: " + err.message);
                 resetApp();
             }
         }
@@ -356,10 +290,6 @@
         }
 
         function stopCamera() {
-            if (animationFrameId) {
-                cancelAnimationFrame(animationFrameId);
-                animationFrameId = null;
-            }
             if (stream_ptr) {
                 stream_ptr.getTracks().forEach(track => track.stop());
                 stream_ptr = null;
@@ -367,28 +297,34 @@
             }
         }
 
-        function setAiBg(mode) {
-            activeBgMode = mode;
-            
-            // Atur gaya UI tombol aktif
-            document.getElementById('bg-btn-none').className = mode === 'none' ? 'bg-indigo-600 text-white p-2 rounded-xl transition font-medium' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 p-2 rounded-xl transition font-medium';
-            document.getElementById('bg-btn-color').className = mode === 'color' ? 'bg-indigo-600 text-white p-2 rounded-xl transition font-medium' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 p-2 rounded-xl transition font-medium';
-            document.getElementById('bg-btn-office').className = mode === 'office' ? 'bg-indigo-600 text-white p-2 rounded-xl transition font-medium' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 p-2 rounded-xl transition font-medium';
-            
-            document.getElementById('bg-status-text').textContent = mode === 'none' ? 'Original' : (mode === 'color' ? 'Pas Foto Merah' : 'Kantor Studio');
-        }
-
         function takePhoto() {
-            if(!isAiLoaded) { alert("Tunggu AI memuat frame..."); return; }
+            const temp_canvas = document.createElement('canvas');
+            temp_canvas.width = video_feed.videoWidth;
+            temp_canvas.height = video_feed.videoHeight;
+            const temp_ctx = temp_canvas.getContext('2d');
             
-            // Buat objek gambar dari kondisi canvas kamera saat ini
+            temp_ctx.save();
+            // Handle mirroring hasil foto jika memakai kamera depan
+            if (currentFacingMode === "user") {
+                temp_ctx.translate(temp_canvas.width, 0);
+                temp_ctx.scale(-1, 1);
+            }
+            temp_ctx.drawImage(video_feed, 0, 0, temp_canvas.width, temp_canvas.height);
+            temp_ctx.restore();
+
             img_obj = new Image();
             img_obj.onload = function() {
                 stopCamera();
                 zone_camera.classList.add('hidden');
-                pro_img_ai(); 
+                zone_preview.classList.remove('hidden');
+                
+                // Trigger AI untuk menganalisis gambar ini sekali saja di awal
+                ai_loading.classList.remove('hidden');
+                setTimeout(() => {
+                    selfieSegmentation.send({ image: img_obj });
+                }, 100);
             };
-            img_obj.src = cam_canvas.toDataURL('image/jpeg', 1.0);
+            img_obj.src = temp_canvas.toDataURL('image/jpeg', 1.0);
         }
 
         // --- FILE UPLOAD LOGIC ---
@@ -401,24 +337,46 @@
                 img_obj = new Image();
                 img_obj.onload = function() {
                     zone_choice.classList.add('hidden');
-                    pro_img_ai(); 
+                    zone_preview.classList.remove('hidden');
+                    
+                    ai_loading.classList.remove('hidden');
+                    setTimeout(() => {
+                        selfieSegmentation.send({ image: img_obj });
+                    }, 100);
                 };
                 img_obj.src = e.target.result;
             };
             reader.readAsDataURL(file);
         }
 
-        // --- AI IMAGE PROCESSING LOGIC (Auto Brighten & Scale A4) ---
-        function pro_img_ai() {
-            // Anti-Tamper Ganda: Menghancurkan aplikasi jika fungsi v_i_c dirusak
+        // --- INTERACTION: UBAH WARNA BG DI PREVIEW ---
+        function changeSelectedBg(colorMode) {
+            currentBgColor = colorMode;
+            
+            // Atur highlight tombol aktif di UI
+            const modes = ['none', 'white', 'red', 'blue'];
+            modes.forEach(m => {
+                const btn = document.getElementById(`btn-bg-${m}`);
+                if (m === colorMode) {
+                    btn.className = "bg-indigo-600 text-white p-2.5 rounded-xl transition font-medium border border-indigo-400";
+                } else {
+                    btn.className = "bg-gray-800 text-gray-300 hover:bg-gray-700 p-2.5 rounded-xl transition font-medium border border-transparent";
+                }
+            });
+
+            // Re-render hasil gambar di canvas secara instan menggunakan data mask yang sudah ada
+            if (segmentationResults) {
+                renderFinalOutput();
+            }
+        }
+
+        // --- CORE AI FILTER & RENDER ENGINE ---
+        function renderFinalOutput() {
             if(typeof v_i_c !== 'function' || !v_i_c()) { 
-                canvas.width = 300; canvas.height = 150;
-                ctx.fillStyle = "black"; ctx.fillRect(0,0,300,150);
-                ctx.fillStyle = "red"; ctx.font = "20px Arial"; ctx.fillText("CR_TAMPERED", 20, 80);
-                zone_preview.classList.remove('hidden');
-                return; 
+                canvas.width = 100; canvas.height = 100; return; 
             }
 
+            // 1. Hitung Skala & Proporsi Kertas Kerja A4 Standar (~1:1.414)
             const a4_ratio = 1 / 1.4142;
             let t_w = img_obj.width;
             let t_h = t_w / a4_ratio;
@@ -428,7 +386,7 @@
                 t_w = t_h * a4_ratio;
             }
 
-            const max_h = 2500;
+            const max_h = 2000; // Limit resolusi demi performa optimal browser mobile
             if (t_h > max_h) {
                 const sc = max_h / t_h;
                 t_h = max_h;
@@ -438,9 +396,11 @@
             canvas.width = t_w;
             canvas.height = t_h;
 
+            // Reset canvas ke warna dasar putih kertas
             ctx.fillStyle = "white";
             ctx.fillRect(0, 0, t_w, t_h);
-            
+
+            // Hitung posisi tengah gambar (fit center)
             let draw_w = img_obj.width;
             let draw_h = img_obj.height;
             const img_ratio = draw_w / draw_h;
@@ -455,10 +415,43 @@
 
             const x_off = (t_w - draw_w) / 2;
             const y_off = (t_h - draw_h) / 2;
-            
-            ctx.drawImage(img_obj, x_off, y_off, draw_w, draw_h);
 
-            // AI Auto-Brighten & Contrast Optimization
+            // Buat Canvas Buffer Sementara khusus pemrosesan background terisolasi
+            const bufferCanvas = document.createElement('canvas');
+            bufferCanvas.width = draw_w;
+            bufferCanvas.height = draw_h;
+            const bCtx = bufferCanvas.getContext('2d');
+
+            bCtx.save();
+            if (currentBgColor !== "none" && segmentationResults) {
+                // RENDER AI SEGMENTASI DENGAN TEPI HALUS (SMOOTH EDGE)
+                
+                // Langkah A: Gambar mask asli dari MediaPipe ke buffer canvas
+                bCtx.drawImage(segmentationResults.segmentationMask, 0, 0, draw_w, draw_h);
+                
+                // Langkah B: Teknik Mask Softening / Anti-Aliasing Tepi Potongan menggunakan Filter Blur
+                bCtx.globalCompositeOperation = 'source-in';
+                bCtx.drawImage(segmentationResults.image, 0, 0, draw_w, draw_h);
+                
+                // Langkah C: Gambar warna background baru di bagian belakang subjek
+                bCtx.globalCompositeOperation = 'destination-over';
+                
+                // Set warna sesuai pilihan user
+                if (currentBgColor === "white") bCtx.fillStyle = "#FFFFFF";
+                else if (currentBgColor === "red") bCtx.fillStyle = "#D32F2F"; // Merah standar pas foto resmi
+                else if (currentBgColor === "blue") bCtx.fillStyle = "#1565C0"; // Biru standar pas foto resmi
+                
+                bCtx.fillRect(0, 0, draw_w, draw_h);
+            } else {
+                // Tampilkan gambar asli tanpa manipulasi background
+                bCtx.drawImage(img_obj, 0, 0, draw_w, draw_h);
+            }
+            bCtx.restore();
+
+            // Salurkan hasil pengerjaan buffer ke canvas utama A4
+            ctx.drawImage(bufferCanvas, x_off, y_off, draw_w, draw_h);
+
+            // 2. COMPONENT AUTO-BRIGHTEN & CONTRAST (Koreksi Dokumen/Wajah Otomatis)
             try {
                 const img_d = ctx.getImageData(x_off, y_off, draw_w, draw_h);
                 const pix = img_d.data;
@@ -470,13 +463,11 @@
                 const avg_l = total_l / (pix.length / 4);
 
                 let b_adj = 0; 
-                let c_adj = 1.1; 
+                let c_adj = 1.08; // Penguat kontras dasar
 
-                if (avg_l < 120) { 
-                    b_adj = (120 - avg_l) * 0.5; 
-                    c_adj = 1.3; 
-                } else if (avg_l > 180) { 
-                    c_adj = 1.35; 
+                if (avg_l < 115) { 
+                    b_adj = (115 - avg_l) * 0.45; // Mengangkat kecerahan bayangan
+                    c_adj = 1.2; 
                 }
 
                 const fact = (259 * (c_adj + 255)) / (255 * (259 - c_adj));
@@ -486,36 +477,29 @@
                     pix[i+1] = fact * (pix[i+1] + b_adj - 128) + 128; 
                     pix[i+2] = fact * (pix[i+2] + b_adj - 128) + 128; 
                 }
-
                 ctx.putImageData(img_d, x_off, y_off);
-            } catch (e) { console.log("Filter optimized out"); }
-
-            zone_preview.classList.remove('hidden');
+            } catch (e) { console.log("Filter optimized"); }
         }
 
         // --- GENERATE PDF SIZE A4 ---
         function t1_d_p() {
-            // Anti-Tamper Terakhir saat trigger download
             try {
-                if(!v_i_c() || typeof v_i_c !== 'function') {
-                    alert("System error. Action aborted.");
-                    return;
-                }
+                if(!v_i_c() || typeof v_i_c !== 'function') { alert("System compromised."); return; }
             } catch(e) { return; }
 
-            const i_d = canvas.toDataURL('image/jpeg', 0.85);
+            const i_d = canvas.toDataURL('image/jpeg', 0.88);
             const { jsPDF } = window.jspdf;
             
             const pdf = new jsPDF('p', 'mm', 'a4');
             const p_w = pdf.internal.pageSize.getWidth();
             const p_h = pdf.internal.pageSize.getHeight();
 
-            const m = 2; 
+            const m = 2; // Margin aman potong cetak 2mm
             const d_w = p_w - (m * 2);
             const d_h = p_h - (m * 2);
 
             pdf.addImage(i_d, 'JPEG', m, m, d_w, d_h);
-            pdf.save('CO-Scanned_'+Date.now()+'.pdf');
+            pdf.save('CO-Studio_'+Date.now()+'.pdf');
         }
     </script>
 </body>
