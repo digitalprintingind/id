@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Judul disamarkan sedikit agar tidak terlalu mencolok di tab -->
+    <title>C-O_Scanner_v2</title>
+    <!-- Tailwind CSS for Modern AI Style -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- jsPDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top right, #111029, #05030a);
+        }
+        .ai-glow { box-shadow: 0 0 20px rgba(99, 102, 241, 0.2); }
+        .ai-glow-strong { box-shadow: 0 0 30px rgba(168, 85, 247, 0.4); }
+        
+        /* Style untuk video camera feed */
+        #camera-feed {
+            transform: scaleX(-1); /* Mirror view untuk kamera depan biar natural */
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen flex flex-col justify-between">
+
+    <!-- Header / Navbar -->
+    <header class="border-b border-gray-800 bg-black/40 backdrop-blur-md sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 p-2 rounded-xl ai-glow">
+                    <i class="fa-solid fa-wand-magic-sparkles text-lg text-white"></i>
+                </div>
+                <span class="text-lg font-bold tracking-wider bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">SCANNER.AI</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="openModal('info-modal')" class="text-gray-500 hover:text-gray-300 transition cursor-pointer">
+                    <i class="fa-solid fa-circle-info text-lg"></i>
+                </button>
+                <!-- Watermark yang terlihat di UI -->
+                <span id="ui-cr" class="text-xs text-gray-700 font-mono select-none"></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 py-8 w-full flex-grow flex flex-col items-center justify-center">
+        
+        <!-- ================= UPLOAD/CAMERA CHOICE ZONE (One Page) ================= -->
+        <div id="choice-zone" class="w-full max-w-2xl grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- Pilihan 1: Kamera Langsung -->
+            <div onclick="startCamera()" class="group bg-gray-900/40 border-2 border-dashed border-purple-500/30 hover:border-purple-400 rounded-3xl p-8 text-center cursor-pointer transition-all duration-300 hover:-translate-y-1 ai-glow hover:ai-glow-strong">
+                <div class="w-16 h-16 bg-purple-950/50 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-purple-500/30 group-hover:scale-110 transition">
+                    <i class="fa-solid fa-camera text-3xl text-purple-400"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2 text-white">Ambil Foto</h3>
+                <p class="text-gray-400 text-sm">Gunakan kamera perangkat Anda untuk scan dokumen secara langsung.</p>
+            </div>
+
+            <!-- Pilihan 2: Upload File -->
+            <div class="group bg-gray-900/40 border-2 border-dashed border-indigo-500/30 hover:border-indigo-400 rounded-3xl p-8 text-center cursor-pointer transition-all duration-300 hover:-translate-y-1 ai-glow hover:ai-glow-strong overflow-hidden relative">
+                <input type="file" id="file-input" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10" onchange="handleFileUpload(event)">
+                <div class="w-16 h-16 bg-indigo-950/50 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-indigo-500/30 group-hover:scale-110 transition">
+                    <i class="fa-solid fa-cloud-arrow-up text-3xl text-indigo-400"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-2 text-white">Unggah Gambar</h3>
+                <p class="text-gray-400 text-sm">Pilih foto dokumen yang sudah ada dari galeri perangkat Anda.</p>
+            </div>
+        </div>
+
+        <!-- ================= LIVE CAMERA VIDEO ZONE (Hidden by default) ================= -->
+        <div id="camera-zone" class="w-full max-w-md bg-gray-900 border border-gray-800 rounded-3xl p-4 hidden ai-glow overflow-hidden relative">
+            <div class="relative rounded-2xl overflow-hidden border border-gray-700 bg-black aspect-[3/4]">
+                <video id="camera-feed" autoplay playsinline class="w-full h-full object-cover"></video>
+                <!-- Overlay bingkai scan -->
+                <div class="absolute inset-8 border-2 border-indigo-400/50 rounded-lg pointer-events-none">
+                    <div class="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-indigo-400 -translate-x-1 -translate-y-1"></div>
+                    <div class="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-indigo-400 translate-x-1 -translate-y-1"></div>
+                    <div class="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-indigo-400 -translate-x-1 translate-y-1"></div>
+                    <div class="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-indigo-400 translate-x-1 translate-y-1"></div>
+                </div>
+            </div>
+            
+            <div class="flex justify-center gap-4 mt-4">
+                <button onclick="stopCamera()" class="bg-gray-700 hover:bg-gray-600 text-white px-5 py-3 rounded-xl cursor-pointer transition">
+                    <i class="fa-solid fa-xmark mr-2"></i>Batal
+                </button>
+                <button onclick="takePhoto()" class="flex-grow bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-3 rounded-xl cursor-pointer transition shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-circle-dot mr-2"></i>Tangkap Gambar
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= PREVIEW & ACTION ZONE (Hidden by default) ================= -->
+        <div id="preview-zone" class="w-full max-w-2xl bg-gray-900/60 border border-gray-800 rounded-3xl p-6 hidden ai-glow">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="flex h-3 w-3 relative">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </span>
+                    <span class="text-sm font-semibold text-emerald-400 uppercase tracking-wider">AI Enhanced Result</span>
+                </div>
+                <button onclick="resetApp()" class="text-sm text-gray-500 hover:text-red-400 transition cursor-pointer">
+                    <i class="fa-solid fa-rotate-left mr-1"></i> Ulangi
+                </button>
+            </div>
+
+            <!-- Canvas Container -->
+            <div class="relative rounded-2xl overflow-hidden border border-gray-700 bg-black flex justify-center items-center mb-6 max-h-[500px]">
+                <canvas id="output-canvas" class="max-w-full max-h-[500px] object-contain"></canvas>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="p-3 bg-gray-950 border border-gray-800 rounded-xl flex items-center gap-3 text-xs text-gray-500">
+                    <i class="fa-solid fa-wand-magic text-indigo-400 text-lg"></i>
+                    <div>
+                        <p class="font-semibold text-gray-300">Auto-Enhancement Aktif</p>
+                        <p>Kecerahan dioptimalkan, dokumen dirapikan (A4).</p>
+                    </div>
+                </div>
+                <button id="btn-pdf" onclick="t1_d_p()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-indigo-500/20 cursor-pointer disabled:opacity-50">
+                    <i class="fa-solid fa-file-pdf text-lg"></i>
+                    Unduh PDF (A4)
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-900 bg-black/20 text-center py-4 text-xs text-gray-600">
+        &copy; 2026 AI-Scanner | Internal Processing Only
+    </footer>
+
+    <!-- Modal Popup Component -->
+    <div id="info-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-gray-900 border border-gray-800 w-full max-w-md rounded-2xl p-6 transform scale-95 transition-transform duration-300">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-robot text-indigo-400"></i> Fitur AI Scan
+                </h3>
+                <button onclick="closeModal('info-modal')" class="text-gray-500 hover:text-white transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="space-y-3 text-sm text-gray-300">
+                <p>Aplikasi ini memproses gambar Anda langsung di browser secara aman:</p>
+                <ul class="list-disc list-inside space-y-2 text-gray-400 font-light">
+                    <li><strong class="text-gray-200">Kamera / Unggah:</strong> Dua cara input dokumen.</li>
+                    <li><strong class="text-gray-200">Auto-Enhance:</strong> Memperbaiki kecerahan & kontras foto yang gelap secara otomatis agar teks jelas.</li>
+                    <li><strong class="text-gray-200">Format A4:</strong> Memaksa proporsi gambar menjadi standar kertas A4 untuk PDF.</li>
+                </ul>
+            </div>
+            <button onclick="closeModal('info-modal')" class="w-full mt-6 bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl text-sm font-semibold transition cursor-pointer">
+                Lanjutkan
+            </button>
+        </div>
+    </div>
+
+    <!-- Core Logic JavaScript -->
+    <script>
+        // === [BAGIAN PROTEKSI - JANGAN DIUBAH] ===
+        // Menyimpan mark pembuat dalam Base64 agar tidak mudah dicari teks mentahnya.
+        // Teks asli: "CodeOn by_ridwan"
+        const _0xcr_k = "Q29kZU9uIGJ5X3JpZHdhbg=="; 
+        
+        // Fungsi pengecekan integritas disamarkan namanya (v_i_c = validate integrity c...)
+        function v_i_c() {
+            try {
+                const dec = atob(_0xcr_k);
+                // Cek apakah variabel kunci ada dan isinya benar setelah di-decode
+                if (!_0xcr_k || dec !== "CodeOn by_ridwan" || dec.length !== 16) {
+                    return false;
+                }
+                // Update UI watermark secara dinamis
+                const u = document.getElementById('ui-cr');
+                if(u) u.textContent = dec;
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+        // Jalankan cek awal saat load
+        if(!v_i_c()) { document.body.innerHTML = '<div style="color:white;text-align:center;margin-top:100px;font-family:sans-serif;"><h1>APP_CORRUPTED_ERROR_0xCR</h1><p>Integritas kode rusak. Pembuat asli: '+atob("Q29kZU9uIGJ5X3JpZHdhbg==")+'</p></div>'; throw "StopJS"; }
+        // ===========================================
+
+        let img_obj = null;
+        let stream_ptr = null; // Pointer untuk camera stream
+
+        const zone_choice = document.getElementById('choice-zone');
+        const zone_camera = document.getElementById('camera-zone');
+        const zone_preview = document.getElementById('preview-zone');
+        const video_feed = document.getElementById('camera-feed');
+        const canvas = document.getElementById('output-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- MODAL FUNCTIONS ---
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.querySelector('.transform').classList.remove('scale-95');
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modal.querySelector('.transform').classList.add('scale-95');
+        }
+
+        // --- CORE NAV LOGIC ---
+        function resetApp() {
+            stopCamera();
+            img_obj = null;
+            document.getElementById('file-input').value = "";
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            zone_choice.classList.remove('hidden');
+            zone_camera.classList.add('hidden');
+            zone_preview.classList.add('hidden');
+        }
+
+        // --- CAMERA LOGIC ---
+        let currentFacingMode = "environment"; // Standar kamera belakang
+
+        async function startCamera() {
+            if(!v_i_c()) { resetApp(); return; } 
+
+            zone_choice.classList.add('hidden');
+            zone_camera.classList.remove('hidden');
+
+            if (stream_ptr) { stopCamera(); } // Reset stream jika ada
+
+            try {
+                stream_ptr = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: currentFacingMode,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }, 
+                    audio: false 
+                });
+                video_feed.srcObject = stream_ptr;
+            } catch (err) {
+                alert("Gagal mengakses kamera.\n1. Pastikan buka di Browser Chrome/Safari asli.\n2. Pastikan izin kamera diaktifkan.\n\nError: " + err.message);
+                resetApp();
+            }
+        }
+
+        // Anda bisa panggil fungsi ini jika ingin membuat tombol ganti kamera depan/belakang
+        function switchCamera() {
+            currentFacingMode = (currentFacingMode === "environment") ? "user" : "environment";
+            startCamera();
+        }
+
+        function stopCamera() {
+            if (stream_ptr) {
+                stream_ptr.getTracks().forEach(track => track.stop());
+                stream_ptr = null;
+                video_feed.srcObject = null;
+            }
+        }
+
+        function takePhoto() {
+            // Capture frame video ke canvas sementara
+            const temp_canvas = document.createElement('canvas');
+            temp_canvas.width = video_feed.videoWidth;
+            temp_canvas.height = video_feed.videoHeight;
+            const temp_ctx = temp_canvas.getContext('2d');
+            
+            // Gambar frame video ke temp canvas (perlu handle mirroring jika pakai kamera depan)
+            // Karena kita pakai facingMode environment, biasanya tidak mirror. 
+            // Jika memaksa mirror di CSS, kita harus un-mirror di canvas:
+            temp_ctx.save();
+            // Jika CSS me-mirror video, un-mirror di sini untuk hasil foto asli
+            // temp_ctx.scale(-1, 1); 
+            // temp_ctx.drawImage(video_feed, -temp_canvas.width, 0, temp_canvas.width, temp_canvas.height);
+            
+            // Standar (asumsi kamera belakang):
+            temp_ctx.drawImage(video_feed, 0, 0, temp_canvas.width, temp_canvas.height);
+            temp_ctx.restore();
+
+            // Ubah jadi objek gambar untuk diproses AI filter
+            img_obj = new Image();
+            img_obj.onload = function() {
+                stopCamera();
+                zone_camera.classList.add('hidden');
+                pro_img_ai(); // Jalankan pemrosesan
+            };
+            img_obj.src = temp_canvas.toDataURL('image/jpeg');
+        }
+
+        // --- FILE UPLOAD LOGIC ---
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                img_obj = new Image();
+                img_obj.onload = function() {
+                    zone_choice.classList.add('hidden');
+                    pro_img_ai(); // Jalankan pemrosesan
+                };
+                img_obj.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- AI IMAGE PROCESSING LOGIC (Auto Brighten, Scale A4) ---
+        // Nama fungsi disamarkan sedikit (pro_img_ai = process image ai)
+        function pro_img_ai() {
+            // Proteksi: Cek mark sebelum memproses
+            if(!v_i_c()) { 
+                // Jika corrupt, rusak fungsi canvas
+                canvas.width = 100; canvas.height = 100;
+                ctx.fillStyle = "red"; ctx.fillText("ERR_CR", 10, 50);
+                zone_preview.classList.remove('hidden');
+                document.getElementById('btn-pdf').disabled = true;
+                return; 
+            }
+
+            // 1. Set Dimensi Canvas & Auto-Scale (Memaksa proporsi A4 terlepas dari input)
+            // Rasio A4 adalah ~1:1.414 (Portrait)
+            const a4_ratio = 1 / 1.4142;
+            
+            // Kita gunakan lebar gambar asli sebagai acuan, lalu hitung tinggi A4-nya
+            let t_w = img_obj.width;
+            let t_h = t_w / a4_ratio;
+
+            // Jika setelah dihitung tingginya malah kependekan dibanding aslinya, balik logikanya
+            if (t_h < img_obj.height) {
+                t_h = img_obj.height;
+                t_w = t_h * a4_ratio;
+            }
+
+            // Batasi ukuran maksimal canvas agar browser tidak crash (max height 2500px)
+            const max_h = 2500;
+            if (t_h > max_h) {
+                const sc = max_h / t_h;
+                t_h = max_h;
+                t_w = t_w * sc;
+            }
+
+            canvas.width = t_w;
+            canvas.height = t_h;
+
+            // Gambar dasar: putih (untuk area kosong jika proporsi tidak pas)
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, t_w, t_h);
+            
+            // Gambar foto asli ke tengah canvas (fit center)
+            let draw_w = img_obj.width;
+            let draw_h = img_obj.height;
+            const img_ratio = draw_w / draw_h;
+
+            if (img_ratio > a4_ratio) {
+                // Gambar lebih lebar dari A4
+                draw_w = t_w;
+                draw_h = t_w / img_ratio;
+            } else {
+                // Gambar lebih tinggi dari A4
+                draw_h = t_h;
+                draw_w = t_h * img_ratio;
+            }
+
+            const x_off = (t_w - draw_w) / 2;
+            const y_off = (t_h - draw_h) / 2;
+            
+            ctx.drawImage(img_obj, x_off, y_off, draw_w, draw_h);
+
+            // 2. AI Filter: Auto-Brighten & Contrast (Hanya area yang digambar foto)
+            try {
+                const img_d = ctx.getImageData(x_off, y_off, draw_w, draw_h);
+                const pix = img_d.data;
+                
+                // Hitung rata-rata kecerahan
+                let total_l = 0;
+                for (let i = 0; i < pix.length; i += 4) {
+                    total_l += (0.299 * pix[i] + 0.587 * pix[i+1] + 0.114 * pix[i+2]);
+                }
+                const avg_l = total_l / (pix.length / 4);
+
+                // Tentukan faktor koreksi
+                let b_adj = 0; // Brightness
+                let c_adj = 1.1; // Contrast base
+
+                if (avg_l < 120) { // Jika gambar gelap
+                    b_adj = (120 - avg_l) * 0.5; // Angkat kecerahan
+                    c_adj = 1.25; // Naikkan kontras lebih agresif untuk dokumen
+                } else if (avg_l > 180) { // Jika terlalu terang
+                    c_adj = 1.3; // Pertajam kontras teks
+                }
+
+                const fact = (259 * (c_adj + 255)) / (255 * (259 - c_adj));
+
+                // Terapkan filter piksel
+                for (let i = 0; i < pix.length; i += 4) {
+                    // Brightness + Contrast (R, G, B)
+                    pix[i]   = fact * (pix[i] + b_adj - 128) + 128; 
+                    pix[i+1] = fact * (pix[i+1] + b_adj - 128) + 128; 
+                    pix[i+2] = fact * (pix[i+2] + b_adj - 128) + 128; 
+                }
+
+                ctx.putImageData(img_d, x_off, y_off);
+            } catch (e) { console.log("Filter skip (local cross-origin?)"); }
+
+            zone_preview.classList.remove('hidden');
+        }
+
+        // --- GENERATE PDF SIZE A4 ---
+        // Nama fungsi disamarkan (t1_d_p = trigger download pdf)
+        function t1_d_p() {
+            // Proteksi Ganda: Cek mark lagi tepat sebelum generate PDF
+            // Jika kode v_i_c dihapus oleh user, panggil fungsi yang tidak ada agar error.
+            try {
+                if(typeof v_i_c !== 'function' || !v_i_c()) { 
+                    alert("ERR: System Integrity Compromised."); 
+                    // Menghancurkan output PDF (opsional)
+                    ctx.fillStyle="black"; ctx.fillRect(0,0,canvas.width,canvas.height);
+                }
+            } catch(e) { /* crash intentionally if v_i_c is removed */ }
+
+            const i_d = canvas.toDataURL('image/jpeg', 0.85); // Kompresi 85%
+
+            const { jsPDF } = window.jspdf;
+            
+            // Membuat PDF A4 (Portrait, mm)
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const p_w = pdf.internal.pageSize.getWidth();
+            const p_h = pdf.internal.pageSize.getHeight();
+
+            // Karena canvas sudah disesuaikan ke proporsi A4 di fungsi pro_img_ai, 
+            // kita tinggal gambar penuh di PDF (beri sedikit margin 2mm agar rapi saat cetak)
+            const m = 2; 
+            const d_w = p_w - (m * 2);
+            const d_h = p_h - (m * 2);
+
+            pdf.addImage(i_d, 'JPEG', m, m, d_w, d_h);
+            
+            // Nama file juga disamarkan sedikit
+            pdf.save('CO-Scanned_'+Date.now()+'.pdf');
+        }
+    </script>
+</body>
+</html>
