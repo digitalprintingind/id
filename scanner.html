@@ -21,6 +21,12 @@
         
         #camera-feed { object-fit: cover; }
         .mirror-view { transform: scaleX(-1); }
+        
+        .canvas-container {
+            position: relative;
+            user-select: none;
+            touch-action: none;
+        }
     </style>
 </head>
 <body class="text-gray-100 min-h-screen flex flex-col justify-between">
@@ -82,7 +88,7 @@
             </div>
             
             <div class="flex justify-center gap-4 mt-4">
-                <button onclick="stopCamera(); resetApp();" class="bg-gray-700 hover:bg-gray-600 text-white px-5 py-3 rounded-xl cursor-pointer transition">
+                <button onclick="resetApp()" class="bg-gray-700 hover:bg-gray-600 text-white px-5 py-3 rounded-xl cursor-pointer transition">
                     <i class="fa-solid fa-xmark mr-2"></i>Batal
                 </button>
                 <button onclick="takePhoto()" class="flex-grow bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-3 rounded-xl cursor-pointer transition shadow-lg shadow-indigo-500/30">
@@ -98,7 +104,7 @@
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                     </span>
-                    <span class="text-sm font-semibold text-emerald-400 uppercase tracking-wider">AI Studio Preview</span>
+                    <span class="text-sm font-semibold text-emerald-400 uppercase tracking-wider">AI Studio Preview & Editor</span>
                 </div>
                 <button onclick="resetApp()" class="text-sm text-gray-500 hover:text-red-400 transition cursor-pointer">
                     <i class="fa-solid fa-rotate-left mr-1"></i> Ulangi
@@ -106,44 +112,64 @@
             </div>
 
             <div class="relative rounded-2xl overflow-hidden border border-gray-700 bg-black flex justify-center items-center mb-4 max-h-[480px]">
-                <canvas id="output-canvas" class="max-w-full max-h-[480px] object-contain"></canvas>
+                <div class="canvas-container" id="canvas-wrap">
+                    <canvas id="output-canvas" class="max-w-full max-h-[480px] object-contain"></canvas>
+                </div>
                 <div id="ai-loading" class="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3 hidden z-20">
                     <i class="fa-solid fa-circle-notch animate-spin text-3xl text-indigo-500"></i>
-                    <p class="text-sm text-gray-300 font-mono">AI Refine Edge & Segmenting...</p>
+                    <p class="text-sm text-gray-300 font-mono">AI Studio Refining Edge & Backlight...</p>
                 </div>
             </div>
 
-            <div class="bg-gray-950 border border-gray-800 p-4 rounded-2xl mb-4">
+            <div class="grid grid-cols-2 gap-3 mb-4" id="normal-editor-tools">
+                <button onclick="rotateImage()" class="bg-gray-800 hover:bg-gray-700 text-gray-200 p-2.5 rounded-xl transition text-xs font-semibold cursor-pointer flex items-center justify-center gap-2 border border-gray-700">
+                    <i class="fa-solid fa-rotate text-indigo-400"></i> Putar Foto 90&deg;
+                </button>
+                <button onclick="startCropMode()" class="bg-gray-800 hover:bg-gray-700 text-gray-200 p-2.5 rounded-xl transition text-xs font-semibold cursor-pointer flex items-center justify-center gap-2 border border-gray-700">
+                    <i class="fa-solid fa-crop-simple text-purple-400"></i> Potong Gambar (Crop)
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mb-4 hidden" id="crop-active-tools">
+                <button onclick="cancelCrop()" class="bg-gray-800 hover:bg-gray-700 text-red-400 p-3 rounded-xl transition text-xs font-bold cursor-pointer flex items-center justify-center gap-2 border border-red-900/30">
+                    <i class="fa-solid fa-ban"></i> Batal Crop
+                </button>
+                <button onclick="applyCrop()" class="bg-purple-600 hover:bg-purple-500 text-white p-3 rounded-xl transition text-xs font-bold cursor-pointer flex items-center justify-center gap-2 border border-purple-400">
+                    <i class="fa-solid fa-check"></i> Selesai Crop
+                </button>
+            </div>
+
+            <div class="bg-gray-950 border border-gray-800 p-4 rounded-2xl mb-4" id="bg-selector-panel">
                 <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-2">
-                    <i class="fa-solid fa-palette text-indigo-400 mr-1"></i> Opsi Latar Belakang Pas Foto (AI Free)
+                    <i class="fa-solid fa-palette text-indigo-400 mr-1"></i> Latar Belakang Pas Foto (AI Studio Gradation)
                 </span>
                 <div class="grid grid-cols-4 gap-2 text-xs">
                     <button onclick="changeSelectedBg('none')" id="btn-bg-none" class="bg-indigo-600 text-white p-2.5 rounded-xl transition font-medium cursor-pointer border border-transparent">
                         Asli
                     </button>
                     <button onclick="changeSelectedBg('white')" id="btn-bg-white" class="bg-gray-800 text-gray-300 hover:bg-gray-700 p-2.5 rounded-xl transition font-medium cursor-pointer border border-transparent">
-                        <span class="inline-block w-3 h-3 bg-white rounded-full mr-1 align-middle border border-gray-400"></span> Putih
+                        <span class="inline-block w-3 h-3 bg-white rounded-full mr-1 align-middle border border-gray-400"></span> Studio Putih
                     </button>
                     <button onclick="changeSelectedBg('red')" id="btn-bg-red" class="bg-gray-800 text-gray-300 hover:bg-gray-700 p-2.5 rounded-xl transition font-medium cursor-pointer border border-transparent">
-                        <span class="inline-block w-3 h-3 bg-red-600 rounded-full mr-1 align-middle"></span> Merah
+                        <span class="inline-block w-3 h-3 bg-red-600 rounded-full mr-1 align-middle"></span> Studio Merah
                     </button>
                     <button onclick="changeSelectedBg('blue')" id="btn-bg-blue" class="bg-gray-800 text-gray-300 hover:bg-gray-700 p-2.5 rounded-xl transition font-medium cursor-pointer border border-transparent">
-                        <span class="inline-block w-3 h-3 bg-blue-600 rounded-full mr-1 align-middle"></span> Biru
+                        <span class="inline-block w-3 h-3 bg-blue-600 rounded-full mr-1 align-middle"></span> Studio Biru
                     </button>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="action-download-panel">
                 <div class="p-3 bg-gray-950 border border-gray-800 rounded-xl flex items-center gap-3 text-xs text-gray-500">
                     <i class="fa-solid fa-wand-magic text-indigo-400 text-lg"></i>
                     <div>
                         <p class="font-semibold text-gray-300">Auto-Refine Aktif</p>
-                        <p>Kecerahan otomatis & penghalusan tepi potongan AI.</p>
+                        <p>Simpan dokumen otomatis pas skala cetak kertas A4.</p>
                     </div>
                 </div>
                 <button id="btn-pdf" onclick="t1_d_p()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-indigo-500/20 cursor-pointer">
                     <i class="fa-solid fa-file-pdf text-lg"></i>
-                    Unduh PDF (A4)
+                    Unduh PDF (Size A4)
                 </button>
             </div>
         </div>
@@ -167,9 +193,9 @@
             <div class="space-y-3 text-sm text-gray-300">
                 <p>Aplikasi ini memproses gambar Anda langsung di browser secara aman:</p>
                 <ul class="list-disc list-inside space-y-2 text-gray-400 font-light">
-                    <li><strong class="text-gray-200">Kamera Depan/Belakang:</strong> Fleksibel untuk dokumen maupun potret mandiri.</li>
-                    <li><strong class="text-gray-200">Ganti BG Pas Foto:</strong> Setelah gambar diambil, Anda dapat memilih warna Putih, Merah, atau Biru secara instan dengan potongan rapi berkat fitur *Edge Smoothing*.</li>
-                    <li><strong class="text-gray-200">Auto-Enhance & A4:</strong> Memperbaiki pencahayaan otomatis dan merapikan output skala kertas A4.</li>
+                    <li><strong class="text-gray-200">Anti-Potong Rotasi:</strong> Memutar foto bebas tanpa takut gambar terpotong bingkai.</li>
+                    <li><strong class="text-gray-200">AI Deep Erosi Mask:</strong> Memotong sisa warna background lama di tepi objek dengan presisi ketat.</li>
+                    <li><strong class="text-gray-200">Crop Interaktif:</strong> Klik tombol crop untuk memotong permanen gambar pas foto Anda sebelum diunduh.</li>
                 </ul>
             </div>
             <button onclick="closeModal('info-modal')" class="w-full mt-6 bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl text-sm font-semibold transition cursor-pointer">
@@ -197,10 +223,17 @@
         let img_obj = null;
         let stream_ptr = null; 
         let currentFacingMode = "environment"; 
-        let currentBgColor = "none"; // none, white, red, blue
-        
-        // Objek internal penampung hasil segmentasi AI agar ganti warna bisa instan tanpa panggil ulang model AI
+        let currentBgColor = "none"; 
         let segmentationResults = null; 
+        
+        // Editor State
+        let rotationAngle = 0; 
+        let isCropModeActive = false;
+        let cropArea = { x: 0, y: 0, w: 0, h: 0 }; 
+        let isDraggingCrop = false;
+        let isResizingCrop = false;
+        let dragStartOffset = { x: 0, y: 0 };
+        const resizeHandleSize = 18;
 
         const zone_choice = document.getElementById('choice-zone');
         const zone_camera = document.getElementById('camera-zone');
@@ -210,23 +243,18 @@
         const ctx = canvas.getContext('2d');
         const ai_loading = document.getElementById('ai-loading');
 
-        // --- INITIALIZE MEDIAPIPE SELFIE SEGMENTATION ---
         const selfieSegmentation = new SelfieSegmentation({
             locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
         });
 
-        selfieSegmentation.setOptions({
-            modelSelection: 1 // Mode landscape agar ekstra cepat & akurat di HP
-        });
+        selfieSegmentation.setOptions({ modelSelection: 1 });
 
-        // Callback utama saat AI selesai memproses gambar statis
         selfieSegmentation.onResults((results) => {
             segmentationResults = results;
             renderFinalOutput();
             ai_loading.classList.add('hidden');
         });
 
-        // --- MODAL FUNCTIONS ---
         function openModal(id) {
             const modal = document.getElementById(id);
             modal.classList.remove('opacity-0', 'pointer-events-none');
@@ -239,13 +267,18 @@
             modal.querySelector('.transform').classList.add('scale-95');
         }
 
-        // --- CORE NAV LOGIC ---
         function resetApp() {
             stopCamera();
             img_obj = null;
             segmentationResults = null;
             currentBgColor = "none";
+            rotationAngle = 0;
+            isCropModeActive = false;
             document.getElementById('file-input').value = "";
+            document.getElementById('normal-editor-tools').classList.remove('hidden');
+            document.getElementById('crop-active-tools').classList.add('hidden');
+            document.getElementById('bg-selector-panel').classList.remove('hidden');
+            document.getElementById('action-download-panel').classList.remove('hidden');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             zone_choice.classList.remove('hidden');
@@ -253,13 +286,10 @@
             zone_preview.classList.add('hidden');
         }
 
-        // --- CAMERA LOGIC ---
         async function startCamera() {
             if(!v_i_c() || _0xcr_k !== "Q29kZU9uIGJ5X3JpZHdhbg==") { window.location.reload(); return; }
-
             zone_choice.classList.add('hidden');
             zone_camera.classList.remove('hidden');
-
             if (stream_ptr) { stopCamera(); }
 
             if (currentFacingMode === "user") {
@@ -270,16 +300,12 @@
 
             try {
                 stream_ptr = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
-                        facingMode: currentFacingMode,
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    }, 
+                    video: { facingMode: currentFacingMode, width: { ideal: 1280 }, height: { ideal: 720 } }, 
                     audio: false 
                 });
                 video_feed.srcObject = stream_ptr;
             } catch (err) {
-                alert("Gagal mengakses kamera. Silakan buka lewat Google Chrome asli / HTTPS dan izinkan akses kamera.\n\nError: " + err.message);
+                alert("Gagal mengakses kamera.\nError: " + err.message);
                 resetApp();
             }
         }
@@ -304,7 +330,6 @@
             const temp_ctx = temp_canvas.getContext('2d');
             
             temp_ctx.save();
-            // Handle mirroring hasil foto jika memakai kamera depan
             if (currentFacingMode === "user") {
                 temp_ctx.translate(temp_canvas.width, 0);
                 temp_ctx.scale(-1, 1);
@@ -317,189 +342,354 @@
                 stopCamera();
                 zone_camera.classList.add('hidden');
                 zone_preview.classList.remove('hidden');
-                
-                // Trigger AI untuk menganalisis gambar ini sekali saja di awal
                 ai_loading.classList.remove('hidden');
-                setTimeout(() => {
-                    selfieSegmentation.send({ image: img_obj });
-                }, 100);
+                setTimeout(() => { selfieSegmentation.send({ image: img_obj }); }, 100);
             };
             img_obj.src = temp_canvas.toDataURL('image/jpeg', 1.0);
         }
 
-        // --- FILE UPLOAD LOGIC ---
         function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 img_obj = new Image();
                 img_obj.onload = function() {
                     zone_choice.classList.add('hidden');
                     zone_preview.classList.remove('hidden');
-                    
                     ai_loading.classList.remove('hidden');
-                    setTimeout(() => {
-                        selfieSegmentation.send({ image: img_obj });
-                    }, 100);
+                    setTimeout(() => { selfieSegmentation.send({ image: img_obj }); }, 100);
                 };
                 img_obj.src = e.target.result;
             };
             reader.readAsDataURL(file);
         }
 
-        // --- INTERACTION: UBAH WARNA BG DI PREVIEW ---
         function changeSelectedBg(colorMode) {
             currentBgColor = colorMode;
-            
-            // Atur highlight tombol aktif di UI
             const modes = ['none', 'white', 'red', 'blue'];
             modes.forEach(m => {
-                const btn = document.getElementById(`btn-bg-${m}`);
-                if (m === colorMode) {
-                    btn.className = "bg-indigo-600 text-white p-2.5 rounded-xl transition font-medium border border-indigo-400";
-                } else {
-                    btn.className = "bg-gray-800 text-gray-300 hover:bg-gray-700 p-2.5 rounded-xl transition font-medium border border-transparent";
-                }
+                document.getElementById(`btn-bg-${m}`).className = (m === colorMode) ? 
+                "bg-indigo-600 text-white p-2.5 rounded-xl transition font-medium border border-indigo-400" : 
+                "bg-gray-800 text-gray-300 hover:bg-gray-700 p-2.5 rounded-xl transition font-medium border border-transparent";
             });
-
-            // Re-render hasil gambar di canvas secara instan menggunakan data mask yang sudah ada
-            if (segmentationResults) {
-                renderFinalOutput();
-            }
+            renderFinalOutput();
         }
 
-        // --- CORE AI FILTER & RENDER ENGINE ---
+        function rotateImage() {
+            rotationAngle = (rotationAngle + 90) % 360;
+            renderFinalOutput();
+        }
+
+        function startCropMode() {
+            isCropModeActive = true;
+            
+            document.getElementById('normal-editor-tools').classList.add('hidden');
+            document.getElementById('bg-selector-panel').classList.add('hidden');
+            document.getElementById('action-download-panel').classList.add('hidden');
+            document.getElementById('crop-active-tools').classList.remove('hidden');
+
+            cropArea.x = canvas.width * 0.2;
+            cropArea.y = canvas.height * 0.15;
+            cropArea.w = canvas.width * 0.6;
+            cropArea.h = cropArea.w * 1.414; 
+
+            if (cropArea.y + cropArea.h > canvas.height) {
+                cropArea.h = canvas.height - cropArea.y - 15;
+                cropArea.w = cropArea.h / 1.414;
+            }
+            renderFinalOutput();
+        }
+
+        function cancelCrop() {
+            isCropModeActive = false;
+            document.getElementById('normal-editor-tools').classList.remove('hidden');
+            document.getElementById('bg-selector-panel').classList.remove('hidden');
+            document.getElementById('action-download-panel').classList.remove('hidden');
+            document.getElementById('crop-active-tools').classList.add('hidden');
+            renderFinalOutput();
+        }
+
+        function applyCrop() {
+            isCropModeActive = false;
+            
+            const cutCanvas = document.createElement('canvas');
+            cutCanvas.width = cropArea.w;
+            cutCanvas.height = cropArea.h;
+            const cutCtx = cutCanvas.getContext('2d');
+            
+            cutCtx.drawImage(canvas, cropArea.x, cropArea.y, cropArea.w, cropArea.h, 0, 0, cropArea.w, cropArea.h);
+            
+            img_obj = new Image();
+            img_obj.onload = function() {
+                rotationAngle = 0;
+                segmentationResults = null; 
+                currentBgColor = "none";
+                
+                document.getElementById('normal-editor-tools').className = "grid grid-cols-2 gap-3 mb-4";
+                document.getElementById('bg-selector-panel').classList.remove('hidden');
+                document.getElementById('action-download-panel').classList.remove('hidden');
+                document.getElementById('crop-active-tools').classList.add('hidden');
+                
+                ai_loading.classList.remove('hidden');
+                setTimeout(() => { selfieSegmentation.send({ image: img_obj }); }, 100);
+            };
+            img_obj.src = cutCanvas.toDataURL('image/jpeg', 1.0);
+        }
+
+        // --- CORE AI FILTER & RENDER ENGINE (ANTI-TERPOTONG & RESPONSIF SKALA) ---
         function renderFinalOutput() {
-            if(typeof v_i_c !== 'function' || !v_i_c()) { 
-                canvas.width = 100; canvas.height = 100; return; 
+            if(typeof v_i_c !== 'function' || !v_i_c()) { canvas.width = 100; canvas.height = 100; return; }
+
+            // 1. Tentukan orientasi dimensi secara adaptif berdasarkan sudut rotasi saat ini
+            const isRotatedOrtho = (rotationAngle === 90 || rotationAngle === 270);
+            let displayW = isRotatedOrtho ? img_obj.height : img_obj.width;
+            let displayH = isRotatedOrtho ? img_obj.width : img_obj.height;
+
+            // 2. Set pembatas resolusi render layar pengerjaan agar responsif di HP
+            const max_h = 1200; 
+            if (displayH > max_h) {
+                const sc = max_h / displayH;
+                displayH = max_h;
+                displayW = displayW * sc;
             }
 
-            // 1. Hitung Skala & Proporsi Kertas Kerja A4 Standar (~1:1.414)
-            const a4_ratio = 1 / 1.4142;
-            let t_w = img_obj.width;
-            let t_h = t_w / a4_ratio;
+            // Canvas utama diubah ukurannya secara adaptif mengikuti objek (TIDAK AKAN TERPOTONG)
+            canvas.width = displayW;
+            canvas.height = displayH;
 
-            if (t_h < img_obj.height) {
-                t_h = img_obj.height;
-                t_w = t_h * a4_ratio;
-            }
+            ctx.fillStyle = "#FFFFFF";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            const max_h = 2000; // Limit resolusi demi performa optimal browser mobile
-            if (t_h > max_h) {
-                const sc = max_h / t_h;
-                t_h = max_h;
-                t_w = t_w * sc;
-            }
+            // 3. Buat canvas internal khusus pengerjaan transformasi rotasi
+            const rotCanvas = document.createElement('canvas');
+            rotCanvas.width = displayW;
+            rotCanvas.height = displayH;
+            const rotCtx = rotCanvas.getContext('2d');
 
-            canvas.width = t_w;
-            canvas.height = t_h;
+            rotCtx.translate(displayW / 2, displayH / 2);
+            rotCtx.rotate((rotationAngle * Math.PI) / 180);
 
-            // Reset canvas ke warna dasar putih kertas
-            ctx.fillStyle = "white";
-            ctx.fillRect(0, 0, t_w, t_h);
-
-            // Hitung posisi tengah gambar (fit center)
-            let draw_w = img_obj.width;
-            let draw_h = img_obj.height;
-            const img_ratio = draw_w / draw_h;
-
-            if (img_ratio > a4_ratio) {
-                draw_w = t_w;
-                draw_h = t_w / img_ratio;
+            // Penempatan matriks terbalik yang presisi agar gambar utuh 100%
+            if (isRotatedOrtho) {
+                rotCtx.drawImage(img_obj, -displayH / 2, -displayW / 2, displayH, displayW);
             } else {
-                draw_h = t_h;
-                draw_w = t_h * img_ratio;
+                rotCtx.drawImage(img_obj, -displayW / 2, -displayH / 2, displayW, displayH);
             }
 
-            const x_off = (t_w - draw_w) / 2;
-            const y_off = (t_h - draw_h) / 2;
+            if (currentBgColor === "none" || !segmentationResults) {
+                ctx.drawImage(rotCanvas, 0, 0);
+                applyBrightenAndContrast(0, 0, canvas.width, canvas.height);
+                drawCropOverlay();
+                return;
+            }
 
-            // Buat Canvas Buffer Sementara khusus pemrosesan background terisolasi
-            const bufferCanvas = document.createElement('canvas');
-            bufferCanvas.width = draw_w;
-            bufferCanvas.height = draw_h;
-            const bCtx = bufferCanvas.getContext('2d');
+            // ========================================================
+            // PROSES BACKING STUDIO TAJAM (HIGH SATURATION ACCENT)
+            // ========================================================
+            const bgCanvas = document.createElement('canvas');
+            bgCanvas.width = displayW;
+            bgCanvas.height = displayH;
+            const bgCtx = bgCanvas.getContext('2d');
 
-            bCtx.save();
-            if (currentBgColor !== "none" && segmentationResults) {
-                // RENDER AI SEGMENTASI DENGAN TEPI HALUS (SMOOTH EDGE)
-                
-                // Langkah A: Gambar mask asli dari MediaPipe ke buffer canvas
-                bCtx.drawImage(segmentationResults.segmentationMask, 0, 0, draw_w, draw_h);
-                
-                // Langkah B: Teknik Mask Softening / Anti-Aliasing Tepi Potongan menggunakan Filter Blur
-                bCtx.globalCompositeOperation = 'source-in';
-                bCtx.drawImage(segmentationResults.image, 0, 0, draw_w, draw_h);
-                
-                // Langkah C: Gambar warna background baru di bagian belakang subjek
-                bCtx.globalCompositeOperation = 'destination-over';
-                
-                // Set warna sesuai pilihan user
-                if (currentBgColor === "white") bCtx.fillStyle = "#FFFFFF";
-                else if (currentBgColor === "red") bCtx.fillStyle = "#D32F2F"; // Merah standar pas foto resmi
-                else if (currentBgColor === "blue") bCtx.fillStyle = "#1565C0"; // Biru standar pas foto resmi
-                
-                bCtx.fillRect(0, 0, draw_w, draw_h);
+            const centerX = displayW / 2;
+            const centerY = displayH * 0.38; 
+            const radiusInner = 15;
+            const radiusOuter = Math.max(displayW, displayH) * 0.60;
+            let studioGrad = bgCtx.createRadialGradient(centerX, centerY, radiusInner, centerX, centerY, radiusOuter);
+
+            if (currentBgColor === "red") {
+                studioGrad.addColorStop(0, '#FF0505');   
+                studioGrad.addColorStop(0.3, '#D50000'); 
+                studioGrad.addColorStop(0.8, '#550000'); 
+                studioGrad.addColorStop(1, '#000000');    
+                bgCtx.fillStyle = studioGrad;
+            } else if (currentBgColor === "blue") {
+                studioGrad.addColorStop(0, '#1A73E8');   
+                studioGrad.addColorStop(0.28, '#0022DD'); 
+                studioGrad.addColorStop(0.8, '#030E26'); 
+                studioGrad.addColorStop(1, '#000000');    
+                bgCtx.fillStyle = studioGrad;
+            } else if (currentBgColor === "white") {
+                studioGrad.addColorStop(0, '#FFFFFF');
+                studioGrad.addColorStop(0.7, '#F2F2F6');
+                studioGrad.addColorStop(1, '#CCCCCC');
+                bgCtx.fillStyle = studioGrad;
+            }
+            bgCtx.fillRect(0, 0, displayW, displayH);
+
+            // Membuat mask rotasi
+            const maskRotCanvas = document.createElement('canvas');
+            maskRotCanvas.width = displayW;
+            maskRotCanvas.height = displayH;
+            const maskRotCtx = maskRotCanvas.getContext('2d');
+            maskRotCtx.translate(displayW / 2, displayH / 2);
+            maskRotCtx.rotate((rotationAngle * Math.PI) / 180);
+
+            if (isRotatedOrtho) {
+                maskRotCtx.drawImage(segmentationResults.segmentationMask, -displayH / 2, -displayW / 2, displayH, displayW);
             } else {
-                // Tampilkan gambar asli tanpa manipulasi background
-                bCtx.drawImage(img_obj, 0, 0, draw_w, draw_h);
+                maskRotCtx.drawImage(segmentationResults.segmentationMask, -displayW / 2, -displayH / 2, displayW, displayH);
             }
-            bCtx.restore();
 
-            // Salurkan hasil pengerjaan buffer ke canvas utama A4
-            ctx.drawImage(bufferCanvas, x_off, y_off, draw_w, draw_h);
+            // ALGORITMA DEEP EROSI MASKER: Thresholding ditingkatkan (175) untuk mengikis kotoran luar
+            const maskData = maskRotCtx.getImageData(0, 0, displayW, displayH);
+            const maskPix = maskData.data;
+            for (let i = 0; i < maskPix.length; i += 4) {
+                let val = maskPix[i];
+                if (val > 175) { 
+                    maskPix[i] = 255;
+                    maskPix[i+3] = 255;
+                } else {
+                    maskPix[i] = 0;
+                    maskPix[i+3] = 0;
+                }
+            }
+            maskRotCtx.putImageData(maskData, 0, 0);
 
-            // 2. COMPONENT AUTO-BRIGHTEN & CONTRAST (Koreksi Dokumen/Wajah Otomatis)
+            // Gabungkan objek manusia dengan background studio baru
+            const fgCanvas = document.createElement('canvas');
+            fgCanvas.width = displayW;
+            fgCanvas.height = displayH;
+            const fgCtx = fgCanvas.getContext('2d');
+
+            fgCtx.drawImage(rotCanvas, 0, 0, displayW, displayH);
+            fgCtx.globalCompositeOperation = 'destination-in';
+            fgCtx.filter = 'blur(1px)'; 
+            fgCtx.drawImage(maskRotCanvas, 0, 0, displayW, displayH);
+            fgCtx.filter = 'none';
+
+            bgCtx.drawImage(fgCanvas, 0, 0, displayW, displayH);
+            ctx.drawImage(bgCanvas, 0, 0);
+
+            applyBrightenAndContrast(0, 0, canvas.width, canvas.height);
+            drawCropOverlay();
+        }
+
+        function applyBrightenAndContrast(x, y, w, h) {
             try {
-                const img_d = ctx.getImageData(x_off, y_off, draw_w, draw_h);
+                const img_d = ctx.getImageData(x, y, w, h);
                 const pix = img_d.data;
-                
-                let total_l = 0;
-                for (let i = 0; i < pix.length; i += 4) {
-                    total_l += (0.299 * pix[i] + 0.587 * pix[i+1] + 0.114 * pix[i+2]);
+                let total_l = 0; let count = 0;
+                for (let i = 0; i < pix.length; i += 16) { 
+                    total_l += (0.299 * pix[i] + 0.587 * pix[i+1] + 0.114 * pix[i+2]); count++;
                 }
-                const avg_l = total_l / (pix.length / 4);
+                const avg_l = total_l / count;
+                let b_adj = 4; let c_adj = 1.18; 
 
-                let b_adj = 0; 
-                let c_adj = 1.08; // Penguat kontras dasar
-
-                if (avg_l < 115) { 
-                    b_adj = (115 - avg_l) * 0.45; // Mengangkat kecerahan bayangan
-                    c_adj = 1.2; 
-                }
-
+                if (avg_l < 120) { b_adj = (120 - avg_l) * 0.38; c_adj = 1.25; }
                 const fact = (259 * (c_adj + 255)) / (255 * (259 - c_adj));
-
                 for (let i = 0; i < pix.length; i += 4) {
                     pix[i]   = fact * (pix[i] + b_adj - 128) + 128; 
                     pix[i+1] = fact * (pix[i+1] + b_adj - 128) + 128; 
                     pix[i+2] = fact * (pix[i+2] + b_adj - 128) + 128; 
                 }
-                ctx.putImageData(img_d, x_off, y_off);
-            } catch (e) { console.log("Filter optimized"); }
+                ctx.putImageData(img_d, x, y);
+            } catch (e) {}
         }
 
-        // --- GENERATE PDF SIZE A4 ---
+        function drawCropOverlay() {
+            if (!isCropModeActive) return;
+            ctx.fillStyle = "rgba(0, 0, 0, 0.72)";
+            ctx.fillRect(0, 0, canvas.width, cropArea.y);
+            ctx.fillRect(0, cropArea.y + cropArea.h, canvas.width, canvas.height - (cropArea.y + cropArea.h));
+            ctx.fillRect(0, cropArea.y, cropArea.x, cropArea.h);
+            ctx.fillRect(cropArea.x + cropArea.w, cropArea.y, canvas.width - (cropArea.x + cropArea.w), cropArea.h);
+
+            ctx.strokeStyle = "#C084FC"; 
+            ctx.lineWidth = 3;
+            ctx.strokeRect(cropArea.x, cropArea.y, cropArea.w, cropArea.h);
+
+            ctx.fillStyle = "#A855F7";
+            ctx.fillRect(cropArea.x + cropArea.w - (resizeHandleSize/2), cropArea.y + cropArea.h - (resizeHandleSize/2), resizeHandleSize, resizeHandleSize);
+        }
+
+        function getCanvasMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: ((clientX - rect.left) / rect.width) * canvas.width, y: ((clientY - rect.top) / rect.height) * canvas.height };
+        }
+
+        function handleMouseDown(e) {
+            if (!isCropModeActive) return;
+            const pos = getCanvasMousePos(e);
+            const handleX = cropArea.x + cropArea.w;
+            const handleY = cropArea.y + cropArea.h;
+            
+            if (Math.abs(pos.x - handleX) < resizeHandleSize * 1.5 && Math.abs(pos.y - handleY) < resizeHandleSize * 1.5) {
+                isResizingCrop = true;
+                e.preventDefault();
+                return;
+            }
+            if (pos.x > cropArea.x && pos.x < cropArea.x + cropArea.w && pos.y > cropArea.y && pos.y < cropArea.y + cropArea.h) {
+                isDraggingCrop = true;
+                dragStartOffset.x = pos.x - cropArea.x;
+                dragStartOffset.y = pos.y - cropArea.y;
+                e.preventDefault();
+            }
+        }
+
+        function handleMouseMove(e) {
+            if (!isCropModeActive) return;
+            const pos = getCanvasMousePos(e);
+
+            if (isResizingCrop) {
+                let newW = pos.x - cropArea.x;
+                if (newW < 80) newW = 80;
+                let newH = newW * 1.414;
+                if (cropArea.x + newW <= canvas.width && cropArea.y + newH <= canvas.height) {
+                    cropArea.w = newW; cropArea.h = newH;
+                }
+                renderFinalOutput();
+                e.preventDefault();
+            } else if (isDraggingCrop) {
+                let newX = pos.x - dragStartOffset.x;
+                let newY = pos.y - dragStartOffset.y;
+                if (newX < 0) newX = 0; if (newY < 0) newY = 0;
+                if (newX + cropArea.w > canvas.width) newX = canvas.width - cropArea.w;
+                if (newY + cropArea.h > canvas.height) newY = canvas.height - cropArea.h;
+                cropArea.x = newX; cropArea.y = newY;
+                renderFinalOutput();
+                e.preventDefault();
+            }
+        }
+
+        canvas.addEventListener('mousedown', handleMouseDown);
+        canvas.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', () => { isDraggingCrop = false; isResizingCrop = false; });
+        canvas.addEventListener('touchstart', handleMouseDown, { passive: false });
+        canvas.addEventListener('touchmove', handleMouseMove, { passive: false });
+        window.addEventListener('touchend', () => { isDraggingCrop = false; isResizingCrop = false; });
+
+        // --- GENERATE PDF ---
         function t1_d_p() {
             try {
                 if(!v_i_c() || typeof v_i_c !== 'function') { alert("System compromised."); return; }
             } catch(e) { return; }
 
-            const i_d = canvas.toDataURL('image/jpeg', 0.88);
+            const i_d = canvas.toDataURL('image/jpeg', 0.95);
             const { jsPDF } = window.jspdf;
             
             const pdf = new jsPDF('p', 'mm', 'a4');
             const p_w = pdf.internal.pageSize.getWidth();
             const p_h = pdf.internal.pageSize.getHeight();
 
-            const m = 2; // Margin aman potong cetak 2mm
+            const m = 4; 
             const d_w = p_w - (m * 2);
-            const d_h = p_h - (m * 2);
+            const d_h = p_w * (canvas.height / canvas.width) - (m * 2);
 
-            pdf.addImage(i_d, 'JPEG', m, m, d_w, d_h);
-            pdf.save('CO-Studio_'+Date.now()+'.pdf');
+            let renderH = d_h; let renderW = d_w;
+            if (renderH > p_h - (m * 2)) {
+                renderH = p_h - (m * 2);
+                renderW = renderH * (canvas.width / canvas.height);
+            }
+
+            const xCentering = (p_w - renderW) / 2;
+            const yCentering = (p_h - renderH) / 2;
+
+            pdf.addImage(i_d, 'JPEG', xCentering, yCentering, renderW, renderH);
+            pdf.save('CO-Studio-Pro_'+Date.now()+'.pdf');
         }
     </script>
 </body>
