@@ -251,7 +251,18 @@
     </main>
 
     <script>
-        // === [BAGIAN PROTEKSI - JANGAN DIUBAH] ===
+        // === [KEAMANAN TAMBAHAN: MENCEGAH KLIK KANAN & SHORTCUT INSPECT] ===
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
+            if (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.keyCode === 85)) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && (e.key === 'i' || e.key === 'I' || e.keyCode === 73)) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && (e.key === 'j' || e.key === 'J' || e.keyCode === 74)) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && (e.key === 'c' || e.key === 'C' || e.keyCode === 67)) { e.preventDefault(); return false; }
+            if (e.ctrlKey && (e.key === 's' || e.key === 'S' || e.keyCode === 83)) { e.preventDefault(); return false; }
+        });
+        
+        // === [BAGIAN PROTEKSI INTI - JANGAN DIUBAH] ===
         const _0xcr_k = "Q29kZU9uIGJ5X3JpZHdhbg=="; 
         
         function v_i_c() {
@@ -280,14 +291,14 @@
         // State Drag Keseluruhan Area Crop
         let isDraggingWholeCrop = false;
         let lastCropDragPos = { x: 0, y: 0 };
-        let isCropStateSavedForDrag = false; // Penanda agar Undo Crop hanya merekam 1 tarikan geser
+        let isCropStateSavedForDrag = false; 
 
-        // MANAJEMEN RIWAYAT UNDO / REDO (GLOBAL GAMBAR)
+        // MANAJEMEN RIWAYAT UNDO / REDO
         let undoStack = [];
         let redoStack = [];
         const maxHistorySize = 15;
 
-        // MANAJEMEN RIWAYAT UNDO / REDO (KHUSUS CROP WARP LINE)
+        // MANAJEMEN RIWAYAT UNDO / REDO (KHUSUS CROP)
         let cropUndoStack = [];
         let cropRedoStack = [];
 
@@ -332,20 +343,15 @@
             document.getElementById('sharpness-value').innerText = value + '%';
         }
 
-        // Fungsi pemicu render ulang ketika setting diubah
         function updateImageProcessing() {
             if (!img_obj) return;
-            
-            // Tutup mode crop jika aktif agar tidak bentrok saat processing
             if (isCropModeActive) cancelCrop();
             
             ai_loading.classList.remove('hidden');
-            
-            // Beri sedikit delay agar UI tidak freeze
             setTimeout(() => {
                 renderFinalOutput();
                 calculateAndSetInitialFitScale();
-                saveStateToHistory(); // Simpan perubahan efek ke history
+                saveStateToHistory(); 
                 ai_loading.classList.add('hidden');
             }, 50);
         }
@@ -362,14 +368,13 @@
             cropRedoStack = [];
             updateHistoryButtons();
             
-            // Reset Settings
+            // Reset Settings UI
             document.getElementById('setting-bw').checked = false;
             document.getElementById('setting-sharpness').value = 0;
             updateSharpnessUI(0);
             
-            // Sembunyikan tombol setting
             document.getElementById('btn-global-settings').classList.add('hidden');
-            if (isSettingsOpen) toggleSettingsPanel(); // Tutup panel jika terbuka
+            if (isSettingsOpen) toggleSettingsPanel();
 
             document.getElementById('file-input').value = "";
             document.getElementById('normal-editor-tools').classList.remove('hidden');
@@ -427,7 +432,7 @@
                 stopCamera();
                 zone_camera.classList.add('hidden'); 
                 zone_preview.classList.remove('hidden');
-                document.getElementById('btn-global-settings').classList.remove('hidden'); // Munculkan setting
+                document.getElementById('btn-global-settings').classList.remove('hidden');
                 
                 renderFinalOutput();
                 calculateAndSetInitialFitScale(); 
@@ -445,7 +450,7 @@
                 img_obj.onload = function() {
                     zone_choice.classList.add('hidden'); 
                     zone_preview.classList.remove('hidden');
-                    document.getElementById('btn-global-settings').classList.remove('hidden'); // Munculkan setting
+                    document.getElementById('btn-global-settings').classList.remove('hidden');
                     
                     renderFinalOutput();
                     calculateAndSetInitialFitScale(); 
@@ -490,7 +495,7 @@
             img_obj = new Image();
             img_obj.onload = function() {
                 rotationAngle = 0; 
-                renderFinalOutput(true); // true = skip core processing karena sdh tersimpan di history
+                renderFinalOutput(true); 
                 calculateAndSetInitialFitScale(); 
                 updateHistoryButtons();
                 ai_loading.classList.add('hidden');
@@ -512,9 +517,7 @@
         }
 
         // --- SISTEM UNDO REDO KHUSUS MODE CROP ---
-        function cloneCorners(corners) {
-            return corners.map(c => ({x: c.x, y: c.y}));
-        }
+        function cloneCorners(corners) { return corners.map(c => ({x: c.x, y: c.y})); }
 
         function saveCropState() {
             cropUndoStack.push(cloneCorners(warpCorners));
@@ -575,7 +578,6 @@
 
         function triggerResetView() {
             if (isCropModeActive) cancelCrop(); 
-            
             zoomScale = defaultFitScale; 
             panOffset = { x: 0, y: 0 };
             applyZoomPanStyle();
@@ -584,17 +586,14 @@
         view_window.addEventListener('wheel', (e) => {
             e.preventDefault();
             const zoomFactor = zoomScale * 0.15; 
-            if (e.deltaY < 0) {
-                zoomScale = Math.min(zoomScale + zoomFactor, defaultFitScale * 5.0); 
-            } else {
-                zoomScale = Math.max(zoomScale - zoomFactor, defaultFitScale); 
-            }
+            if (e.deltaY < 0) zoomScale = Math.min(zoomScale + zoomFactor, defaultFitScale * 5.0); 
+            else zoomScale = Math.max(zoomScale - zoomFactor, defaultFitScale); 
             applyZoomPanStyle();
         }, { passive: false });
 
-        // --- SISTEM WARP CROP BEBAS (DENGAN PILIHAN RASIO FINAL) ---
+        // --- SISTEM WARP CROP BEBAS ---
         function startCropMode() {
-            if (isSettingsOpen) toggleSettingsPanel(); // Tutup panel setting
+            if (isSettingsOpen) toggleSettingsPanel();
             isCropModeActive = true;
             cropUndoStack = []; 
             cropRedoStack = [];
@@ -611,7 +610,6 @@
 
         function updateCropRatio(ratioValue, isInit = false) {
             if (!isCropModeActive) return;
-            
             if (!isInit) saveCropState(); 
             
             const w = canvas.width; 
@@ -621,31 +619,24 @@
             let boxW = w * 0.7;
             let boxH = boxW * ratio; 
 
-            if (boxH > h * 0.8) {
-                boxH = h * 0.8;
-                boxW = boxH / ratio;
-            }
+            if (boxH > h * 0.8) { boxH = h * 0.8; boxW = boxH / ratio; }
 
-            const cx = w / 2; 
-            const cy = h / 2;
+            const cx = w / 2; const cy = h / 2;
 
-            warpCorners[0] = { x: cx - boxW/2, y: cy - boxH/2 }; // Top-Left
-            warpCorners[1] = { x: cx + boxW/2, y: cy - boxH/2 }; // Top-Right
-            warpCorners[2] = { x: cx + boxW/2, y: cy + boxH/2 }; // Bottom-Right
-            warpCorners[3] = { x: cx - boxW/2, y: cy + boxH/2 }; // Bottom-Left
-
+            warpCorners[0] = { x: cx - boxW/2, y: cy - boxH/2 }; 
+            warpCorners[1] = { x: cx + boxW/2, y: cy - boxH/2 }; 
+            warpCorners[2] = { x: cx + boxW/2, y: cy + boxH/2 }; 
+            warpCorners[3] = { x: cx - boxW/2, y: cy + boxH/2 }; 
             drawUIOverlay(); 
         }
 
         function cancelCrop() {
             isCropModeActive = false;
-            cropUndoStack = [];
-            cropRedoStack = [];
+            cropUndoStack = []; cropRedoStack = [];
             document.getElementById('editor-title-status').innerText = "Scanner Preview";
             document.getElementById('normal-editor-tools').classList.remove('hidden');
             document.getElementById('action-download-panel').classList.remove('hidden');
             document.getElementById('crop-active-tools').classList.add('hidden');
-            
             drawUIOverlay(); 
         }
 
@@ -704,7 +695,7 @@
             }, 60);
         }
 
-        // --- CORE ENGINE RENDERING & CORE PROCESSING ---
+        // --- CORE ENGINE RENDERING & PROCESSING ---
         function renderFinalOutput(skipCoreProcessing = false) {
             if(!img_obj || typeof v_i_c !== 'function' || !v_i_c()) return;
 
@@ -727,26 +718,19 @@
             else ctx.drawImage(img_obj, -displayW / 2, -displayH / 2, displayW, displayH);
             ctx.restore();
 
-            // Jika load dari history, data pixel sdh matang, tidak perlu diapply efek lagi
             if (!skipCoreProcessing) {
-                // Tarik nilai setting dari UI
                 const sharpness = parseInt(document.getElementById('setting-sharpness').value);
                 const isBW = document.getElementById('setting-bw').checked;
                 
-                // 1. Jalankan Auto Brighten & Contrast Default
                 applyBrightenAndContrast(0, 0, canvas.width, canvas.height);
-                
-                // 2. Jika tajam diaktifkan (>0), jalankan algoritma konvolusi
                 if (sharpness > 0) applySharpness(sharpness);
-                
-                // 3. Jika B&W aktif, konversi terakhir
                 if (isBW) applyBlackAndWhite();
             }
             
             drawUIOverlay(); 
         }
 
-        // ALGORITMA 1: Kecerahan & Kontras Otomatis (Untuk Dokumen Kusam)
+        // ALGORITMA 1: Kecerahan & Kontras
         function applyBrightenAndContrast(x, y, w, h) {
             try {
                 const img_d = ctx.getImageData(x, y, w, h);
@@ -767,31 +751,24 @@
             } catch (e) {}
         }
 
-        // ALGORITMA 2: Ketajaman / Sharpness (Konvolusi Kernel)
+        // ALGORITMA 2: Sharpness (Ketajaman Teks)
         function applySharpness(intensity) {
-            const w = canvas.width;
-            const h = canvas.height;
-            const weights = [0, -1, 0, -1, 5, -1, 0, -1, 0]; // Unsharp mask kernel
+            const w = canvas.width; const h = canvas.height;
+            const weights = [0, -1, 0, -1, 5, -1, 0, -1, 0];
             const katet = Math.round(Math.sqrt(weights.length));
             const half = (katet * 0.5) | 0;
             const dstData = ctx.createImageData(w, h);
             const dstPixels = dstData.data;
             const srcPixels = ctx.getImageData(0, 0, w, h).data;
-
-            // Hitung faktor mix berdasarkan intensitas slider (0-100)
             const mix = intensity / 100;
 
             for (let y = 0; y < h; y++) {
                 for (let x = 0; x < w; x++) {
-                    const sy = y; const sx = x;
                     const dstOff = (y * w + x) * 4;
                     let r = 0, g = 0, b = 0;
-
-                    // Lakukan operasi konvolusi pada pixel tetangga
                     for (let cy = 0; cy < katet; cy++) {
                         for (let cx = 0; cx < katet; cx++) {
-                            const scy = sy + cy - half;
-                            const scx = sx + cx - half;
+                            const scy = y + cy - half; const scx = x + cx - half;
                             if (scy >= 0 && scy < h && scx >= 0 && scx < w) {
                                 const srcOff = (scy * w + scx) * 4;
                                 const wt = weights[cy * katet + cx];
@@ -801,34 +778,28 @@
                             }
                         }
                     }
-
-                    // Terapkan hasil tajam dicampur dengan gambar asli berdasarkan intensitas
                     dstPixels[dstOff]     = r * mix + srcPixels[dstOff] * (1 - mix);
-                    dstPixels[dstOff + 1] = g * mix + srcPixels[dstOff + 1] * ( mixing = 1 - mix);
+                    dstPixels[dstOff + 1] = g * mix + srcPixels[dstOff + 1] * (1 - mix);
                     dstPixels[dstOff + 2] = b * mix + srcPixels[dstOff + 2] * (1 - mix);
-                    dstPixels[dstOff + 3] = srcPixels[dstOff + 3]; // Alpha tetap
+                    dstPixels[dstOff + 3] = srcPixels[dstOff + 3];
                 }
             }
             ctx.putImageData(dstData, 0, 0);
         }
 
-        // ALGORITMA 3: Black and White Dokumen (Grayscale Luminositas)
+        // ALGORITMA 3: Grayscale
         function applyBlackAndWhite() {
             const img_d = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const pix = img_d.data;
             for (let i = 0; i < pix.length; i += 4) {
-                // Formula standar ITU-R BT.601 untuk persepsi kecerahan mata manusia
                 const grayscale = 0.299 * pix[i] + 0.587 * pix[i + 1] + 0.114 * pix[i + 2];
-                // Set R, G, B ke nilai yang sama untuk hasil abu-abu
                 pix[i] = pix[i + 1] = pix[i + 2] = grayscale;
             }
             ctx.putImageData(img_d, 0, 0);
         }
 
-        // --- SISTEM OVERLAY UI ---
         function drawUIOverlay() {
             oCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            
             if (!isCropModeActive) return;
 
             oCtx.strokeStyle = "#A855F7"; oCtx.lineWidth = 6;
@@ -851,7 +822,7 @@
             });
         }
 
-        // --- SISTEM INPUT GESTUR PEMETAAN KOORDINAT ---
+        // --- SISTEM DETEKSI KLIK DI DALAM BENTUK CROP (DRAGGING WHOLE SHAPE) ---
         function isPointInPoly(pt, poly) {
             let inside = false;
             for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
@@ -867,7 +838,6 @@
             const rect = overlayCanvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            
             return {
                 x: ((clientX - rect.left) / rect.width) * overlayCanvas.width,
                 y: ((clientY - rect.top) / rect.height) * overlayCanvas.height,
@@ -877,10 +847,7 @@
 
         view_window.addEventListener('mousedown', (e) => {
             if (isSettingsOpen) {
-                // Tutup panel setting jika user klik di luar panel (area preview)
-                if (!e.target.closest('#settings-panel') && !e.target.closest('#btn-global-settings')) {
-                    toggleSettingsPanel();
-                }
+                if (!e.target.closest('#settings-panel') && !e.target.closest('#btn-global-settings')) toggleSettingsPanel();
             }
 
             const pos = getCanvasMousePos(e);
@@ -888,11 +855,7 @@
             if (isCropModeActive) {
                 activeCornerIndex = -1;
                 warpCorners.forEach((c, idx) => { if (Math.hypot(pos.x - c.x, pos.y - c.y) < cornerHandleRadius * 4) activeCornerIndex = idx; });
-                
-                if (activeCornerIndex !== -1) {
-                    isCropStateSavedForDrag = false;
-                    return; 
-                }
+                if (activeCornerIndex !== -1) { isCropStateSavedForDrag = false; return; }
                 
                 if (isPointInPoly(pos, warpCorners)) {
                     isDraggingWholeCrop = true;
@@ -919,9 +882,7 @@
             
             if (isCropModeActive && isDraggingWholeCrop) {
                 if (!isCropStateSavedForDrag) { saveCropState(); isCropStateSavedForDrag = true; }
-                let dx = pos.x - lastCropDragPos.x;
-                let dy = pos.y - lastCropDragPos.y;
-                
+                let dx = pos.x - lastCropDragPos.x; let dy = pos.y - lastCropDragPos.y;
                 let canMoveX = true; let canMoveY = true;
                 for(let c of warpCorners) {
                     if (c.x + dx < 0 || c.x + dx > overlayCanvas.width) canMoveX = false;
@@ -944,16 +905,10 @@
             }
         });
 
-        window.addEventListener('mouseup', () => { 
-            isPanningView = false; 
-            activeCornerIndex = -1; 
-            isDraggingWholeCrop = false;
-        });
+        window.addEventListener('mouseup', () => { isPanningView = false; activeCornerIndex = -1; isDraggingWholeCrop = false; });
 
         view_window.addEventListener('touchstart', (e) => {
-            if (isSettingsOpen && !e.target.closest('#settings-panel') && !e.target.closest('#btn-global-settings')) {
-                 toggleSettingsPanel();
-            }
+            if (isSettingsOpen && !e.target.closest('#settings-panel') && !e.target.closest('#btn-global-settings')) toggleSettingsPanel();
 
             if (e.touches.length === 2) {
                 initialPinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
@@ -962,11 +917,7 @@
                 if (isCropModeActive) {
                     activeCornerIndex = -1;
                     warpCorners.forEach((c, idx) => { if (Math.hypot(pos.x - c.x, pos.y - c.y) < cornerHandleRadius * 5) activeCornerIndex = idx; });
-                    
-                    if (activeCornerIndex !== -1) { 
-                        isCropStateSavedForDrag = false;
-                        e.preventDefault(); return; 
-                    }
+                    if (activeCornerIndex !== -1) { isCropStateSavedForDrag = false; e.preventDefault(); return; }
                     
                     if (isPointInPoly(pos, warpCorners)) {
                         isDraggingWholeCrop = true;
@@ -991,34 +942,27 @@
                 applyZoomPanStyle();
             } else if (e.touches.length === 1) {
                 const pos = getCanvasMousePos(e);
-                
                 if (isCropModeActive && activeCornerIndex !== -1) {
                     if (!isCropStateSavedForDrag) { saveCropState(); isCropStateSavedForDrag = true; }
                     e.preventDefault();
                     warpCorners[activeCornerIndex].x = Math.max(0, Math.min(pos.x, overlayCanvas.width));
                     warpCorners[activeCornerIndex].y = Math.max(0, Math.min(pos.y, overlayCanvas.height));
-                    drawUIOverlay(); 
-                    return;
+                    drawUIOverlay(); return;
                 }
                 
                 if (isCropModeActive && isDraggingWholeCrop) {
                     if (!isCropStateSavedForDrag) { saveCropState(); isCropStateSavedForDrag = true; }
                     e.preventDefault();
-                    let dx = pos.x - lastCropDragPos.x;
-                    let dy = pos.y - lastCropDragPos.y;
-                    
+                    let dx = pos.x - lastCropDragPos.x; let dy = pos.y - lastCropDragPos.y;
                     let canMoveX = true; let canMoveY = true;
                     for(let c of warpCorners) {
                         if (c.x + dx < 0 || c.x + dx > overlayCanvas.width) canMoveX = false;
                         if (c.y + dy < 0 || c.y + dy > overlayCanvas.height) canMoveY = false;
                     }
-                    
                     if (canMoveX) warpCorners.forEach(c => c.x += dx);
                     if (canMoveY) warpCorners.forEach(c => c.y += dy);
-                    
                     lastCropDragPos = { x: pos.x, y: pos.y };
-                    drawUIOverlay();
-                    return;
+                    drawUIOverlay(); return;
                 }
 
                 if (isPanningView) {
@@ -1028,24 +972,17 @@
             }
         }, { passive: false });
 
-        view_window.addEventListener('touchend', () => { 
-            isPanningView = false; 
-            activeCornerIndex = -1; 
-            isDraggingWholeCrop = false;
-            initialPinchDist = null; 
-        });
+        view_window.addEventListener('touchend', () => { isPanningView = false; activeCornerIndex = -1; isDraggingWholeCrop = false; initialPinchDist = null; });
 
         // --- GENERATE PDF ---
         function t1_d_p() {
             try { if(!v_i_c() || typeof v_i_c !== 'function') return; } catch(e) { return; }
 
             if (isCropModeActive) cancelCrop();
-            if (isSettingsOpen) toggleSettingsPanel(); // Tutup setting
+            if (isSettingsOpen) toggleSettingsPanel(); 
 
             const compressMode = document.getElementById('compress-level').value;
-            let exportQuality = 0.98; 
-            let exportScaleFactor = 1.0; 
-
+            let exportQuality = 0.98; let exportScaleFactor = 1.0; 
             if (compressMode === 'med') { exportQuality = 0.80; exportScaleFactor = 0.65; }
             else if (compressMode === 'low') { exportQuality = 0.60; exportScaleFactor = 0.40; }
 
@@ -1060,13 +997,10 @@
 
             const i_d = targetExportCanvas.toDataURL('image/jpeg', exportQuality);
             const { jsPDF } = window.jspdf;
-            
-            const pdfWidth = targetExportCanvas.width;
-            const pdfHeight = targetExportCanvas.height;
+            const pdfWidth = targetExportCanvas.width; const pdfHeight = targetExportCanvas.height;
             const orientation = pdfWidth > pdfHeight ? 'l' : 'p';
             
             const pdf = new jsPDF({ orientation: orientation, unit: 'px', format: [pdfWidth, pdfHeight] });
-
             pdf.addImage(i_d, 'JPEG', 0, 0, pdfWidth, pdfHeight);
             pdf.save('Scanned_'+Date.now()+'.pdf');
         }
