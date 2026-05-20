@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium URL Shortener</title>
+    
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3011/3011919.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #f3f4f6; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .click-badge { transition: all 0.3s ease-in-out; }
+    </style>
+</head>
+<body class="text-gray-800 antialiased min-h-screen pb-10">
+
+    <div id="mainDashboard">
+        <nav class="bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center text-white">
+                        <i class="fa-solid fa-link text-2xl mr-3"></i>
+                        <span class="font-bold text-xl tracking-wider">ShortyUI</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+            
+            <div class="glass-panel rounded-2xl p-6 mb-8 transform transition duration-500 hover:scale-[1.01]">
+                <h2 class="text-2xl font-semibold mb-5 text-gray-700"><i class="fa-solid fa-wand-magic-sparkles text-indigo-500 mr-2"></i>Buat URL Baru</h2>
+                <form id="createForm" class="flex flex-col md:flex-row gap-4 items-start" onsubmit="event.preventDefault(); handleCreate();">
+                    
+                    <div class="flex-1 w-full">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-globe text-gray-400"></i>
+                            </div>
+                            <input type="url" id="urlInput" required class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition-shadow" placeholder="https://url-panjang-anda.com/article/...">
+                        </div>
+                    </div>
+                    
+                    <div class="w-full md:w-64">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i id="customIcon" class="fa-solid fa-pen-to-square text-gray-400"></i>
+                            </div>
+                            <input type="text" id="customCodeInput" class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none transition-colors" placeholder="Kode Kustom (Opsional)">
+                        </div>
+                        <p id="errorMessage" class="text-xs text-red-500 mt-1 font-medium hidden"></p>
+                    </div>
+                    
+                    <button type="submit" id="submitBtn" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all flex items-center justify-center whitespace-nowrap h-[50px]">
+                        <i class="fa-solid fa-bolt mr-2"></i> Shorten
+                    </button>
+                </form>
+            </div>
+
+            <div class="glass-panel rounded-2xl p-6 overflow-hidden">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                    <h2 class="text-2xl font-semibold text-gray-700 flex items-center">
+                        <i class="fa-solid fa-chart-pie text-purple-500 mr-2"></i>Statistik & Manajemen
+                        <span id="liveIndicator" class="ml-3 flex h-3 w-3 relative" title="Live Local Storage Aktif">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                        </span>
+                    </h2>
+                    
+                    <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                        <div class="flex items-center space-x-2 w-full sm:w-auto">
+                            <span class="text-xs text-gray-500 whitespace-nowrap">Tampilkan:</span>
+                            <select id="rowsPerPageSelect" class="block py-2 px-3 border border-gray-300 bg-white rounded-lg text-sm focus:ring-purple-500 focus:border-purple-500">
+                                <option value="5" selected>5</option>
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+                        <div class="relative w-full sm:w-auto">
+                            <input type="date" id="dateFilter" class="block w-full pl-3 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-purple-500 focus:border-purple-500">
+                        </div>
+                        <div class="relative w-full sm:w-auto flex items-center gap-2">
+                            <div class="relative flex-1">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fa-solid fa-search text-gray-400"></i>
+                                </div>
+                                <input type="text" id="searchInput" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-purple-500 focus:border-purple-500" placeholder="Cari kode / URL...">
+                            </div>
+                            <button type="button" id="resetFilterBtn" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-center gap-1" title="Clear / Reset Filter">
+                                <i class="fa-solid fa-rotate-left"></i> <span class="sm:hidden md:inline">Reset</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-500">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50 rounded-t-lg">
+                            <tr>
+                                <th class="px-4 py-4 text-center rounded-tl-lg w-16">No.</th>
+                                <th class="px-6 py-4">Short Code</th>
+                                <th class="px-6 py-4">Original URL</th>
+                                <th class="px-6 py-4 text-center">Tanggal</th>
+                                <th class="px-6 py-4 text-center">Klik</th>
+                                <th class="px-6 py-4 text-center">Status</th>
+                                <th class="px-6 py-4 text-center rounded-tr-lg">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            </tbody>
+                    </table>
+                </div>
+
+                <div class="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4 border-t border-gray-100 pt-4">
+                    <div class="text-sm text-gray-500" id="paginationInfo">
+                        Menampilkan 0 sampai 0 dari 0 data
+                    </div>
+                    <div class="inline-flex space-x-1" id="paginationControls"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="errorView" class="min-h-screen flex items-center justify-center p-4 hidden">
+        <div id="errorCard" class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 text-center border-t-4 transform transition-all duration-300 scale-100">
+            <div id="errorIconBg" class="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                <i id="errorIcon" class="fa-solid text-4xl animate-pulse"></i>
+            </div>
+            <h1 id="errorTitle" class="text-3xl font-bold text-gray-800 mb-3"></h1>
+            <p id="errorDesc" class="text-gray-500 mb-8 leading-relaxed"></p>
+            <button onclick="closeErrorPage()" class="inline-flex items-center justify-center w-full text-white font-semibold py-3 px-6 rounded-xl transition-colors shadow-lg hover:shadow-xl id-btn-back">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Kembali ke Dashboard
+            </button>
+        </div>
+    </div>
+
+    <div id="editModal" class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-50 flex items-center justify-center backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform scale-95 transition-transform duration-300 overflow-hidden" id="editModalContent">
+            <div class="bg-indigo-600 px-6 py-4 flex justify-between items-center text-white">
+                <h3 class="font-semibold text-lg"><i class="fa-solid fa-pen-to-square mr-2"></i>Edit URL Pendek</h3>
+                <button onclick="closeEditModal()" class="text-white hover:text-gray-200 focus:outline-none"><i class="fa-solid fa-times text-xl"></i></button>
+            </div>
+            <form class="p-6" onsubmit="event.preventDefault(); handleUpdate();">
+                <input type="hidden" id="editOldCode">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kode / Custom URL</label>
+                    <input type="text" id="editNewCode" required class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">URL Asli Tujuan</label>
+                    <input type="url" id="editUrl" required class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-md"><i class="fa-solid fa-save mr-2"></i>Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Membaca atau menginisialisasi database di localStorage
+        function getDatabase() {
+            const db = localStorage.getItem('shorty_db');
+            return db ? JSON.parse(db) : {};
+        }
+
+        function saveDatabase(data) {
+            localStorage.setItem('shorty_db', JSON.stringify(data));
+            // Trigger auto-update view
+            updateTable();
+        }
+
+        // Ambil data keys instan dan paksa bertipe String
+        function getExistingCodes() {
+            return Object.keys(getDatabase()).map(String);
+        }
+
+        // State Pagination & Filter
+        let currentPage = 1;
+        let rowsPerPage = 5;
+
+        const searchInput = document.getElementById('searchInput');
+        const dateFilter = document.getElementById('dateFilter');
+        const resetFilterBtn = document.getElementById('resetFilterBtn');
+        const rowsPerPageSelect = document.getElementById('rowsPerPageSelect');
+        const tableBody = document.getElementById('tableBody');
+        const paginationInfo = document.getElementById('paginationInfo');
+        const paginationControls = document.getElementById('paginationControls');
+
+        // PROSES PEMBUATAN URL BARU (CREATE)
+        function handleCreate() {
+            const url = document.getElementById('urlInput').value.trim();
+            let custom = document.getElementById('customCodeInput').value.trim().replace(/[^a-zA-Z0-9-]/g, '');
+            const db = getDatabase();
+
+            const shortCode = custom !== '' ? custom : Math.random().toString(36).substr(2, 6);
+
+            if (db[shortCode]) {
+                showToast('error', 'Oops!', `Kode "${shortCode}" sudah digunakan!`);
+                return;
+            }
+
+            // Dapatkan tanggal lokal hari ini YYYY-MM-DD
+            const today = new Date().toISOString().split('T')[0];
+
+            db[shortCode] = {
+                url: url,
+                clicks: 0,
+                date: today,
+                status: 'on'
+            };
+
+            saveDatabase(db);
+            document.getElementById('createForm').reset();
+            resetCustomInputStyle();
+            
+            // Generate link pendek kustom Client-Side (?go=code)
+            const baseUrl = window.location.origin + window.location.pathname;
+            const shortUrl = `${baseUrl}?go=${shortCode}`;
+
+            Swal.fire({
+                icon: 'success',
+                title: 'URL Pendek Berhasil Dibuat!',
+                html: `Link Anda: <a href="${shortUrl}" target="_blank" class="text-indigo-600 font-semibold underline">${shortUrl}</a>`,
+                showConfirmButton: true,
+                confirmButtonColor: '#4f46e5'
+            });
+        }
+
+        // PROSES EDIT DATA (UPDATE)
+        function handleUpdate() {
+            const oldCode = document.getElementById('editOldCode').value;
+            const newCode = document.getElementById('editNewCode').value.trim().replace(/[^a-zA-Z0-9-]/g, '');
+            const targetUrl = document.getElementById('editUrl').value.trim();
+            const db = getDatabase();
+
+            if (!db[oldCode]) return;
+
+            const itemData = db[oldCode];
+            itemData.url = targetUrl;
+
+            if (oldCode !== newCode) {
+                if (db[newCode]) {
+                    showToast('error', 'Oops!', `Kode baru "${newCode}" sudah terpakai!`);
+                    return;
+                }
+                db[newCode] = itemData;
+                delete db[oldCode];
+            } else {
+                db[oldCode] = itemData;
+            }
+
+            saveDatabase(db);
+            closeEditModal();
+            showToast('success', 'Berhasil!', 'Data berhasil diperbarui!');
+        }
+
+        // PROSES HAPUS DATA (DELETE)
+        function confirmDelete(code) {
+            Swal.fire({
+                title: 'Yakin hapus kode ini?',
+                text: "Data yang dihapus tidak bisa dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const db = getDatabase();
+                    if (db[code]) {
+                        delete db[code];
+                        saveDatabase(db);
+                        showToast('success', 'Berhasil!', 'Data berhasil dihapus!');
+                    }
+                }
+            });
+        }
+
+        // PROSES SWITCH STATUS (ON/OFF)
+        function toggleStatus(code) {
+            const db = getDatabase();
+            if (db[code]) {
+                db[code].status = (db[code].status === 'on') ? 'off' : 'on';
+                saveDatabase(db);
+                showToast('success', 'Berhasil!', 'Status link berhasil diubah!');
+            }
+        }
+
+        // FUNGSI UTAMA RENDER TABEL & FILTER & PAGINATION ENGINE
+        function updateTable() {
+            const db = getDatabase();
+            const searchTerm = searchInput.value.toLowerCase();
+            const dateTerm = dateFilter.value;
+            
+            // Konversi database object menjadi array untuk pemrosesan sorting (terbaru di atas)
+            let rawList = Object.keys(db).map(code => {
+                return { code: code, ...db[code] };
+            }).reverse();
+
+            // 1. Filtering Prosedur
+            let filteredList = rawList.filter(item => {
+                const matchesSearch = item.code.toLowerCase().includes(searchTerm) || item.url.toLowerCase().includes(searchTerm);
+                const matchesDate = dateTerm === '' || item.date === dateTerm;
+                return matchesSearch && matchesDate;
+            });
+
+            // 2. Render State Aturan
+            tableBody.innerHTML = '';
+            if (filteredList.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-10 text-center text-gray-500">${rawList.length === 0 ? 'Belum ada data URL pendek.' : 'Data tidak ditemukan.'}</td></tr>`;
+                paginationInfo.innerText = "Menampilkan 0 sampai 0 dari 0 data";
+                paginationControls.innerHTML = '';
+                return;
+            }
+
+            const totalRows = filteredList.length;
+            const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const startIdx = (currentPage - 1) * rowsPerPage;
+            const endIdx = startIdx + rowsPerPage;
+            
+            // 3. Slice Array Data untuk Pagination View
+            const pageData = filteredList.slice(startIdx, endIdx);
+            const baseUrl = window.location.origin + window.location.pathname;
+
+            pageData.forEach((item, index) => {
+                const globalNumber = startIdx + index + 1;
+                const shortUrl = `${baseUrl}?go=${item.code}`;
+                const statusOn = item.status === 'on';
+
+                const tr = document.createElement('tr');
+                tr.className = "bg-white border-b hover:bg-gray-50 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-4 py-4 text-center font-medium text-gray-400 whitespace-nowrap">${globalNumber}</td>
+                    <td class="px-6 py-4 font-medium text-indigo-600 whitespace-nowrap">
+                        <a href="${shortUrl}" target="_blank" class="hover:underline flex items-center">
+                            ${item.code} <i class="fa-solid fa-arrow-up-right-from-square ml-2 text-xs opacity-50"></i>
+                        </a>
+                    </td>
+                    <td class="px-6 py-4 truncate max-w-xs" title="${item.url}">${escapeHtml(item.url)}</td>
+                    <td class="px-6 py-4 text-center whitespace-nowrap">
+                        <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs"><i class="fa-regular fa-calendar mr-1"></i> ${item.date}</span>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="click-badge bg-purple-100 text-purple-700 font-bold px-3 py-1 rounded-full text-xs" id="badge-${item.code}">${item.clicks}</span>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <button onclick="toggleStatus('${item.code}')" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-200 focus:outline-none ${statusOn ? 'bg-green-500' : 'bg-gray-300'}" title="Ubah Status">
+                            <span class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform duration-200 ${statusOn ? 'translate-x-6' : 'translate-x-1'}"></span>
+                        </button>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <div class="flex justify-center space-x-2">
+                            <button type="button" onclick="copyToClipboard('${shortUrl}')" class="text-gray-500 hover:text-blue-500 transition-colors" title="Copy Link"><i class="fa-regular fa-copy text-lg"></i></button>
+                            <button type="button" onclick="openEditModal('${item.code}', '${encodeURIComponent(item.url)}')" class="text-gray-500 hover:text-indigo-500 transition-colors" title="Edit"><i class="fa-solid fa-pen text-lg"></i></button>
+                            <button type="button" onclick="confirmDelete('${item.code}')" class="text-gray-500 hover:text-red-500 transition-colors" title="Hapus"><i class="fa-solid fa-trash-can text-lg"></i></button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+
+            // Update Info Teks Keterangan Halaman
+            const displayStart = startIdx + 1;
+            const displayEnd = endIdx > totalRows ? totalRows : endIdx;
+            paginationInfo.innerText = `Menampilkan ${displayStart} sampai ${displayEnd} dari ${totalRows} data`;
+
+            // Render Navigasi Tombol Pagination
+            renderControls(totalPages);
+        }
+
+        function renderControls(totalPages) {
+            paginationControls.innerHTML = '';
+            if (totalPages <= 1) return;
+
+            const prevBtn = document.createElement('button');
+            prevBtn.className = `px-3 py-1 text-sm border rounded-lg transition-colors ${currentPage === 1 ? 'text-gray-400 bg-gray-50 cursor-not-allowed' : 'text-gray-700 bg-white hover:bg-gray-100'}`;
+            prevBtn.innerHTML = '<i class="fa-solid fa-angle-left"></i>';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => { currentPage--; updateTable(); };
+            paginationControls.appendChild(prevBtn);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `px-3 py-1 text-sm border rounded-lg font-medium transition-all ${currentPage === i ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 hover:bg-gray-100'}`;
+                pageBtn.innerText = i;
+                pageBtn.onclick = () => { currentPage = i; updateTable(); };
+                paginationControls.appendChild(pageBtn);
+            }
+
+            const nextBtn = document.createElement('button');
+            nextBtn.className = `px-3 py-1 text-sm border rounded-lg transition-colors ${currentPage === totalPages ? 'text-gray-400 bg-gray-50 cursor-not-allowed' : 'text-gray-700 bg-white hover:bg-gray-100'}`;
+            nextBtn.innerHTML = '<i class="fa-solid fa-angle-right"></i>';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => { currentPage++; updateTable(); };
+            paginationControls.appendChild(nextBtn);
+        }
+
+        // VALIDASI INPUT CUSTOM KODE SECARA REAL-TIME (FIXED AKURAT UNTUK STR & INT)
+        const customInput = document.getElementById('customCodeInput');
+        const errorMessage = document.getElementById('errorMessage');
+        const submitBtn = document.getElementById('submitBtn');
+        const customIcon = document.getElementById('customIcon');
+
+        customInput.addEventListener('input', function() {
+            const typedCode = this.value.trim();
+            const existingCodes = getExistingCodes();
+
+            if (typedCode === '') {
+                resetCustomInputStyle();
+                return;
+            }
+
+            if (existingCodes.includes(typedCode)) {
+                this.className = "block w-full pl-10 pr-3 py-3 border border-red-500 text-red-600 rounded-lg focus:outline-none focus:ring-red-500 focus:border-red-500 transition-colors";
+                customIcon.className = "fa-solid fa-circle-xmark text-red-500";
+                errorMessage.innerText = `Kode "${typedCode}" sudah digunakan!`;
+                errorMessage.classList.remove('hidden');
+                submitBtn.disabled = true;
+                submitBtn.className = "w-full md:w-auto bg-gray-400 text-gray-200 font-semibold py-3 px-6 rounded-lg flex items-center justify-center whitespace-nowrap h-[50px] cursor-not-allowed shadow-none";
+            } else {
+                this.className = "block w-full pl-10 pr-3 py-3 border border-green-500 text-green-600 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 transition-colors";
+                customIcon.className = "fa-solid fa-circle-check text-green-500";
+                errorMessage.classList.add('hidden');
+                submitBtn.disabled = false;
+                submitBtn.className = "w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all flex items-center justify-center whitespace-nowrap h-[50px] cursor-pointer";
+            }
+        });
+
+        function resetCustomInputStyle() {
+            customInput.className = "block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-colors";
+            customIcon.className = "fa-solid fa-pen-to-square text-gray-400";
+            errorMessage.classList.add('hidden');
+            submitBtn.disabled = false;
+            submitBtn.className = "w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all flex items-center justify-center whitespace-nowrap h-[50px] cursor-pointer";
+        }
+
+        // AKSI BUTTON RESET FILTER
+        resetFilterBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            dateFilter.value = '';
+            currentPage = 1;
+            updateTable();
+            showToast('info', 'Filter dibersihkan');
+        });
+
+        searchInput.addEventListener('input', () => { currentPage = 1; updateTable(); });
+        dateFilter.addEventListener('change', () => { currentPage = 1; updateTable(); });
+        rowsPerPageSelect.addEventListener('change', function() {
+            rowsPerPage = parseInt(this.value);
+            currentPage = 1;
+            updateTable();
+        });
+
+        // MANAGEMENT ROUTING DAN INTERPRETER REDIRECT (?go=code)
+        function checkInboundRouting() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetCode = urlParams.get('go');
+
+            if (targetCode !== null) {
+                const db = getDatabase();
+                
+                if (db[targetCode]) {
+                    if (db[targetCode].status && db[targetCode].status === 'off') {
+                        renderErrorView("Akses Ditolak!", "Maaf, link ini sedang dinonaktifkan oleh Administrator. Silakan coba lagi nanti.", "fa-ban", "red");
+                    } else {
+                        // Tambah statistik hit klik
+                        db[targetCode].clicks++;
+                        localStorage.setItem('shorty_db', JSON.stringify(db));
+                        
+                        // Lakukan redirect instan client-side
+                        window.location.href = db[targetCode].url;
+                    }
+                } else {
+                    renderErrorView("404 Not Found", "Waduh! URL Pendek yang Anda tuju tidak ditemukan atau mungkin sudah dihapus.", "fa-link-slash", "gray");
+                }
+                return true; // Mode routing aktif
+            }
+            return false; // Standar dashboard view
+        }
+
+        // RENDERING TAMPILAN HALAMAN ERROR PREMIUM (CLIENT-SIDE)
+        function renderErrorView(title, desc, icon, color) {
+            document.getElementById('mainDashboard').classList.add('hidden');
+            const errorView = document.getElementById('errorView');
+            const card = document.getElementById('errorCard');
+            const iconBg = document.getElementById('errorIconBg');
+            const iconEl = document.getElementById('errorIcon');
+            const btn = errorView.querySelector('.id-btn-back');
+
+            document.getElementById('errorTitle').innerText = title;
+            document.getElementById('errorDesc').innerText = desc;
+            
+            card.className = `bg-white rounded-2xl shadow-xl w-full max-w-md p-8 text-center border-t-4 border-${color}-500 transform transition-all duration-300 scale-100`;
+            iconBg.className = `w-24 h-24 bg-${color}-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner`;
+            iconEl.className = `fa-solid ${icon} text-4xl text-${color}-500 animate-pulse`;
+            
+            btn.className = `inline-flex items-center justify-center w-full bg-${color}-500 hover:bg-${color}-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors shadow-lg hover:shadow-xl id-btn-back`;
+
+            errorView.classList.remove('hidden');
+        }
+
+        function closeErrorPage() {
+            // Bersihkan parameter ?go= dari URL bar tanpa reload halaman demi kenyamanan UX
+            const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            window.history.replaceState({path: cleanUrl}, '', cleanUrl);
+            
+            document.getElementById('errorView').classList.add('hidden');
+            document.getElementById('mainDashboard').classList.remove('hidden');
+            updateTable();
+        }
+
+        // ENGINE MODAL EDIT POPUP
+        const editModal = document.getElementById('editModal');
+        const editModalContent = document.getElementById('editModalContent');
+        
+        function openEditModal(code, encodedUrl) {
+            document.getElementById('editOldCode').value = code;
+            document.getElementById('editNewCode').value = code;
+            document.getElementById('editUrl').value = decodeURIComponent(encodedUrl);
+            editModal.classList.remove('hidden');
+            setTimeout(() => { editModalContent.classList.replace('scale-95', 'scale-100'); }, 10);
+        }
+        
+        function closeEditModal() {
+            editModalContent.classList.replace('scale-100', 'scale-95');
+            setTimeout(() => { editModal.classList.add('hidden'); }, 200);
+        }
+
+        // TOOL UTILITY SINKRONISASI & PERLINDUNGAN XSS
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('success', 'Tersalin!', 'Link disalin ke clipboard.');
+            });
+        }
+
+        function showToast(icon, title, text = '') {
+            Swal.fire({
+                icon: icon,
+                title: title,
+                text: text,
+                timer: 2000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // INISIALISASI UTAMA JALANNYA APLIKASI
+        document.addEventListener('DOMContentLoaded', function() {
+            const isRouting = checkInboundRouting();
+            if (!isRouting) {
+                updateTable();
+                
+                // Sinkronisasi Real-time Tab: jika local storage di-update dari tab lain, view auto update
+                window.addEventListener('storage', function(e) {
+                    if (e.key === 'shorty_db') updateTable();
+                });
+            }
+        });
+    </script>
+</body>
+</html>
